@@ -1,0 +1,81 @@
+{
+ "index_version": "index-2026-05-18",
+ "release": "index-2026-05-18",
+ "repo": "mrm987/peropix-plugin-tag-roll",
+ "total": 959753700,
+ "consts": {
+  "id_since": 2229767,
+  "nposts": {
+   "all": 9160349,
+   "gs": 7388697,
+   "e": 936262
+  }
+ },
+ "files": [
+  {
+   "name": "_tag_dict.parquet",
+   "size": 2000673,
+   "sha256": "8cc7f3e6732ad7e3b0ec06fd060a919249c3b507484f909db2da7a418e4c0537"
+  },
+  {
+   "name": "_roll_since2016.duckdb",
+   "size": 378810368,
+   "sha256": "682faf7b37cd643d58d2ba0b75fbe87923ae7aafefcb0a3fa50a549aa7b5da89"
+  },
+  {
+   "name": "_roll_since2016_tids.npy",
+   "size": 418278690,
+   "sha256": "e85cd70cd790feb1a6223534601691aa53cd8fef72e1e3fbc36f770f1ec9a685"
+  },
+  {
+   "name": "_roll_since2016_offs.npy",
+   "size": 50917672,
+   "sha256": "3c7d8e542b3a0e4c94b06df0019a9c6caeba5b51c71fa1eebfd95435af3aa6fc"
+  },
+  {
+   "name": "_roll_since2016_upid.npy",
+   "size": 25458896,
+   "sha256": "a211b119359b36b58ca62658eac48a5054199f14357299510259d5dd1745a598"
+  },
+  {
+   "name": "_roll_since2016_rating.npy",
+   "size": 6364820,
+   "sha256": "34ff8ba0c671f37b0402e6a2e1b2851b59206b088cbe7c62b85b53d64502c0f5"
+  },
+  {
+   "name": "_roll_since2016_genre_v2.npy",
+   "size": 25458896,
+   "sha256": "7323a6f44b8df403083c4977380521520fad4d31cf712ec879fd37a696ed5425"
+  },
+  {
+   "name": "_roll_since2016_costume.npy",
+   "size": 25458896,
+   "sha256": "fa97c6fafb12facdd5dc8fd4d1fcd0428cfe1b9025b7960b88dc16cbf83b7dd6"
+  },
+  {
+   "name": "_roll_since2016_char.npy",
+   "size": 25458896,
+   "sha256": "bceddfda8b20c75936040c00444458ca93b7f00777596844c9a26881748b8ebc"
+  },
+  {
+   "name": "_roll_pairs_solo.npz",
+   "size": 254981,
+   "sha256": "cd3a3be585e88dc0279a3abeef504d7999f65f32aae270d518cfc1d43d0a92f8"
+  },
+  {
+   "name": "_tag_counts_since2016_all.parquet",
+   "size": 557628,
+   "sha256": "bdc5612965d413d283820ccffc09506099d818f276f7fcb29e4d6669f3775e6d"
+  },
+  {
+   "name": "_tag_counts_since2016_gs.parquet",
+   "size": 536697,
+   "sha256": "c5c23c037647bb4887c5c66a0618ecdc8dededcc23d4f8d05b4a3944e734da14"
+  },
+  {
+   "name": "_tag_counts_since2016_e.parquet",
+   "size": 196587,
+   "sha256": "7ab2ddfbfcc127567bd31796097bbddf98e8fb1b7a67cdd2e42cd7a18e68eb46"
+  }
+ ]
+}

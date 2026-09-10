@@ -1,0 +1,83 @@
+{
+ "A_no_query_upper": {
+  "tiers": [
+   200
+  ],
+  "n": 122.0,
+  "top": [
+   [
+    "shirt",
+    0.532787
+   ],
+   [
+    "serafuku",
+    0.04918
+   ]
+  ],
+  "none_p": 0.418033
+ },
+ "B_serafuku_upper": {
+  "tiers": [
+   60,
+   200
+  ],
+  "n": 6.0,
+  "top": [
+   [
+    "skirt",
+    0.52234
+   ],
+   [
+    "pleated_skirt",
+    0.067824
+   ]
+  ],
+  "none_p": 0.409836
+ },
+ "C_none_onepiece_upper": {
+  "tiers": [
+   65,
+   200
+  ],
+  "n": 65.0,
+  "top": [
+   [
+    "shirt",
+    0.615989
+   ],
+   [
+    "serafuku",
+    0.040422
+   ]
+  ],
+  "none_p": 0.343589
+ },
+ "D_two_tags": {
+  "tiers": [
+   42,
+   71,
+   140,
+   200
+  ],
+  "n": 37.0,
+  "top": [
+   [
+    "dress",
+    0.257293
+   ],
+   [
+    "swimsuit",
+    0.175419
+   ],
+   [
+    "school_uniform",
+    0.064935
+   ],
+   [
+    "white_dress",
+    0.061968
+   ]
+  ],
+  "none_p": 0.502353
+ }
+}
