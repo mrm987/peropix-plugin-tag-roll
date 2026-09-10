@@ -1,5 +1,6 @@
 _lib/
 _tmp/
-_index/
+_data/
+_index-test/
 __pycache__/
 *.pyc

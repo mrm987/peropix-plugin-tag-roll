@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """색인(약 960MB)의 자리와 내려받기.
 
-★★색인은 **플러그인 폴더 밖**에 둔다 — `<앱 뿌리>/data/plugins/tag-roll/`.
-  플러그인을 업데이트하면 앱이 옛 폴더를 `_old-tag-roll-<시각>` 으로 물리고 새 것을 놓으므로
-  (`backend/plugins.py` `install`), 색인을 플러그인 폴더 안에 두면 판을 올릴 때마다 960MB 를
-  다시 받게 된다. 삭제도 같다.
+★★색인은 **이 플러그인 폴더 안의 `_data/`** 에 둔다 (사용자 결정 2026-09-10: 사본은 자기 폴더를
+  벗어나지 않는다). `_data/` 는 앱의 규격이다 — 판을 갈아 끼울 때 앱이 옛 사본의 이 폴더만 새 사본으로
+  옮겨 주므로 업데이트해도 960MB 를 다시 받지 않는다 (`backend/plugins.py` 의 `DATA_FOLDER`).
+  플러그인을 지우면 색인도 함께 휴지통으로 간다.
 ★내려받는 자리는 제작자 저장소의 릴리즈다 (`index-manifest.json` 의 `repo`·`release`).
   GitHub 릴리즈 자산은 파일당 2GiB 미만·1,000개까지이고 총량·전송량 제한이 없다.
 ★파일마다 크기·sha256 을 대조한다. 받다 끊기면 `.part` 를 남기고 다음에 Range 로 이어 받는다.
@@ -21,6 +21,7 @@ import time
 from pathlib import Path
 
 HERE = Path(__file__).parent
+DATA_FOLDER = "_data"   # 앱 규격 — 업데이트해도 남는 자리 (`backend/plugins.py` 의 `DATA_FOLDER` 와 같아야 한다)
 MANIFEST = json.loads((HERE / "index-manifest.json").read_text(encoding="utf-8"))
 FILES: list[dict] = MANIFEST["files"]
 TOTAL: int = int(MANIFEST.get("total") or sum(f["size"] for f in FILES))
@@ -36,18 +37,10 @@ _prog: dict = {}        # {done, total, name, started, error, cancelled}
 
 
 def dirpath() -> Path:
-    """색인 폴더. 환경 변수 `TAG_ROLL_INDEX` 가 있으면 그것을 쓴다 (개발 중 이미 만들어 둔 색인을 가리킬 때)."""
-    env = os.environ.get("TAG_ROLL_INDEX")
-    if env:
-        return Path(env)
-    try:
-        from plugins import host   # 앱 안: 앱 뿌리를 host 가 준다
+    """색인 폴더 — 이 플러그인 폴더의 `_data/`.
 
-        if host.app_dir:
-            return Path(host.app_dir) / "data" / "plugins" / "tag-roll"
-    except Exception:  # noqa: BLE001 — 앱 밖에서 홀로 부를 때
-        pass
-    return HERE / "_index"
+    환경 변수 `TAG_ROLL_INDEX` 가 있으면 그것을 쓴다 (개발 중 이미 만들어 둔 색인을 가리킬 때)."""
+    return Path(os.environ.get("TAG_ROLL_INDEX") or (HERE / DATA_FOLDER))
 
 
 def _have(d: Path, f: dict) -> bool:
