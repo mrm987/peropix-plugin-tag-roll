@@ -25,6 +25,10 @@ MANIFEST = json.loads((HERE / "index-manifest.json").read_text(encoding="utf-8")
 FILES: list[dict] = MANIFEST["files"]
 TOTAL: int = int(MANIFEST.get("total") or sum(f["size"] for f in FILES))
 
+class DownloadError(RuntimeError):
+    """받다가 난 일을 **사용자에게 보일 문구**로 담는다 (화면이 그대로 띄운다 — 예외 이름은 안 붙인다)."""
+
+
 _engine = None          # import 한 엔진 모듈
 _task = None            # 내려받는 중인 작업
 _cancel = False
@@ -116,8 +120,11 @@ async def _fetch(client, url: str, dest: Path, f: dict) -> None:
             _prog["done"] = int(_prog.get("done") or 0) - start
             h, start = hashlib.sha256(), 0
             part.unlink(missing_ok=True)
+        elif r.status_code == 404:
+            # ★릴리즈에 자산이 없을 때 오는 것이다 — 판이 아직 안 올라갔거나 매니페스트의 릴리즈 이름이 다르다
+            raise DownloadError(f"색인을 릴리즈에서 찾지 못했습니다 (HTTP 404). 색인 판 「{MANIFEST.get('release') or '?'}」 이 아직 올라가 있지 않을 수 있습니다:\n{url}")
         elif r.status_code not in (200, 206):
-            raise RuntimeError(f"{dest.name}: HTTP {r.status_code}")
+            raise DownloadError(f"{dest.name} 를 받지 못했습니다 (HTTP {r.status_code})")
         with part.open("ab" if start else "wb") as fh:
             async for chunk in r.aiter_bytes(1 << 20):
                 if _cancel:
@@ -126,10 +133,10 @@ async def _fetch(client, url: str, dest: Path, f: dict) -> None:
                 h.update(chunk)
                 _prog["done"] = int(_prog.get("done") or 0) + len(chunk)
     if part.stat().st_size != f["size"]:
-        raise RuntimeError(f"{dest.name}: 크기가 다릅니다 ({part.stat().st_size:,} ≠ {f['size']:,})")
+        raise DownloadError(f"{dest.name} 의 크기가 다릅니다 ({part.stat().st_size:,} ≠ {f['size']:,})")
     if h.hexdigest() != f["sha256"]:
         part.unlink(missing_ok=True)
-        raise RuntimeError(f"{dest.name}: sha256 이 다릅니다 (받은 파일을 버렸습니다)")
+        raise DownloadError(f"{dest.name} 의 sha256 이 다릅니다 (받은 파일을 버렸습니다)")
     dest.unlink(missing_ok=True)
     part.rename(dest)
 
@@ -153,7 +160,9 @@ async def _run() -> None:
                 await _fetch(c, base + f["name"], d / f["name"], f)
     except asyncio.CancelledError:
         _prog["cancelled"] = True
-    except Exception as e:  # noqa: BLE001 — 못 받은 까닭을 화면에 그대로 보낸다
+    except DownloadError as e:
+        _prog["error"] = str(e)                      # 사용자에게 보일 문구는 그대로
+    except Exception as e:  # noqa: BLE001 — 그 밖의 것은 예외 이름까지 남긴다 (진단용)
         _prog["error"] = f"{type(e).__name__}: {e}"
     finally:
         _cancel = False
