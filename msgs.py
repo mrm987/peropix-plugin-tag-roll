@@ -24,8 +24,6 @@ _TBL: dict[str, dict[str, str]] = {
         "{name} 의 크기가 다릅니다 ({got} ≠ {want})": "{name} has the wrong size ({got} ≠ {want})",
         "{name} 의 sha256 이 다릅니다 (받은 파일을 버렸습니다)": "The sha256 of {name} does not match (the downloaded file was discarded)",
         "색인을 받을 주소가 매니페스트에 없습니다": "The manifest has no address to download the index from",
-        "쓰고 있는 파일이 있어 일부를 못 지웠습니다. 앱을 다시 켠 뒤에 지우십시오.":
-            "Some files are in use and could not be deleted. Restart the app and delete it again.",
     },
     "ja": {
         "색인이 없습니다": "インデックスがありません",
@@ -39,8 +37,6 @@ _TBL: dict[str, dict[str, str]] = {
         "{name} 의 크기가 다릅니다 ({got} ≠ {want})": "{name} のサイズが違います（{got} ≠ {want}）",
         "{name} 의 sha256 이 다릅니다 (받은 파일을 버렸습니다)": "{name} の sha256 が一致しません（取得したファイルは破棄しました）",
         "색인을 받을 주소가 매니페스트에 없습니다": "インデックスの取得先がマニフェストにありません",
-        "쓰고 있는 파일이 있어 일부를 못 지웠습니다. 앱을 다시 켠 뒤에 지우십시오.":
-            "使用中のファイルがあり一部を削除できませんでした。アプリを再起動してから削除してください。",
     },
 }
 

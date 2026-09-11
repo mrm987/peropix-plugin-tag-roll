@@ -192,29 +192,6 @@ def cancel() -> dict:
     return {"ok": True, "idle": True}
 
 
-def remove() -> dict:
-    """색인 지우기 — **매니페스트에 있는 파일만** 지운다 (폴더를 통째로 지우지 않는다).
-
-    ★엔진이 이미 색인을 열었으면 파일이 메모리 맵으로 잡혀 있어 윈도우에서 지워지지 않는다.
-      그때는 무엇이 남았는지 알리고, 앱을 다시 켠 뒤에 지우게 한다."""
-    d = dirpath()
-    gone, kept = [], []
-    for f in FILES:
-        p = d / f["name"]
-        for q in (p, p.with_suffix(p.suffix + ".part")):
-            if not q.is_file():
-                continue
-            try:
-                q.unlink()
-                gone.append(q.name)
-            except OSError as e:
-                kept.append(f"{q.name} ({e.strerror or e})")
-    if kept:
-        return {"ok": False, "removed": gone, "kept": kept,
-                "error": M("쓰고 있는 파일이 있어 일부를 못 지웠습니다. 앱을 다시 켠 뒤에 지우십시오.")}
-    return {"ok": True, "removed": gone}
-
-
 def _import_engine():
     global _engine
     if _engine is None:

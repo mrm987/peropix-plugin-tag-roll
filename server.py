@@ -58,12 +58,6 @@ async def api_index_cancel(request: Request):
     return _json(idx.cancel())
 
 
-@router.delete("/api/index")
-async def api_index_remove(request: Request):
-    _lang(request)
-    return _json(idx.remove())
-
-
 # ── 굴리기 ──────────────────────────────────────────────────────────
 async def _call(request: Request, fn):
     """엔진을 준비하고(첫 회 10초 안팎) 쿼리를 넘긴다. 색인이 없으면 그 사실을 답으로 돌려준다."""

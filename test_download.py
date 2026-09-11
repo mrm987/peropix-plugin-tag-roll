@@ -153,16 +153,12 @@ async def main(src: Path):
         err = idx.status().get("error") or ""
         chk("자산이 없으면 릴리즈를 가리켜 알린다", "404" in err and "릴리즈" in err and "RuntimeError" not in err, err[:120])
 
-        # 지우기
         os.environ["TAG_ROLL_INDEX_URL"] = f"http://127.0.0.1:{PORT}/"
         idx.FILES = [want[n] for n in SMALL]
         idx.TOTAL = sum(f["size"] for f in idx.FILES)
         idx.start()
         await wait_idle(idx)
         chk("다시 받으면 ready", idx.status()["ready"])
-        r = idx.remove()
-        chk("지우면 파일이 없다", r["ok"] and not any((DEST / f["name"]).is_file() for f in idx.FILES), r)
-        chk("지운 뒤 ready 가 아니다", not idx.status()["ready"])
     finally:
         srv.shutdown()
         shutil.rmtree(DEST, ignore_errors=True)
