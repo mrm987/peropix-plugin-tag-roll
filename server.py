@@ -25,6 +25,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import Response
 
 from . import index as idx
+from .msgs import M, set_lang
 
 router = APIRouter()
 
@@ -34,36 +35,46 @@ def _json(d) -> Response:
 
 
 # ── 색인 ────────────────────────────────────────────────────────────
+# ★언어는 화면이 `lang=` 으로 알려 준다 (앱 설정을 따라간다). 창구가 돌려주는 문구가 그 언어로 나간다.
+def _lang(request: Request) -> None:
+    set_lang(parse_qs(request.url.query).get("lang", ["ko"])[0])
+
+
 @router.get("/api/index")
-async def api_index_status():
+async def api_index_status(request: Request):
+    _lang(request)
     return _json(idx.status())
 
 
 @router.post("/api/index/download")
-async def api_index_download():
+async def api_index_download(request: Request):
+    _lang(request)
     return _json(idx.start())
 
 
 @router.post("/api/index/cancel")
-async def api_index_cancel():
+async def api_index_cancel(request: Request):
+    _lang(request)
     return _json(idx.cancel())
 
 
 @router.delete("/api/index")
-async def api_index_remove():
+async def api_index_remove(request: Request):
+    _lang(request)
     return _json(idx.remove())
 
 
 # ── 굴리기 ──────────────────────────────────────────────────────────
 async def _call(request: Request, fn):
     """엔진을 준비하고(첫 회 10초 안팎) 쿼리를 넘긴다. 색인이 없으면 그 사실을 답으로 돌려준다."""
+    _lang(request)
     try:
         E = await idx.engine()
     except FileNotFoundError:
-        return _json({"error": "색인이 없습니다", "need_index": True, "index": idx.status()})
+        return _json({"error": M("색인이 없습니다"), "need_index": True, "index": idx.status()})
     except Exception as e:  # noqa: BLE001 — 색인이 깨졌거나 못 읽는 경우
         traceback.print_exc()
-        return _json({"error": f"색인을 열지 못했습니다: {type(e).__name__}: {e}"})
+        return _json({"error": M("색인을 열지 못했습니다: {detail}", detail=f"{type(e).__name__}: {e}")})
     q = parse_qs(request.url.query)
     try:
         return _json(await asyncio.to_thread(fn, E, q))
@@ -103,7 +114,7 @@ def _roll(E, q):
     anchors = [t.strip().lower().replace(" ", "_") for t in q.get("anchor", [""])[0].split(",") if t.strip()]
     bad = [t for t in anchors if t not in E.TID]
     if bad:
-        return {"error": f"사전에 없는 태그: {bad}"}
+        return {"error": M("사전에 없는 태그: {tags}", tags=bad)}
     seed = int(q.get("seed", ["0"])[0] or 0)
     random_pick = not anchors   # 빈 칸이면 시드마다 새 랜덤 앵커. 입력칸에는 안 써 넣고 결과에만 표시한다 (사용자 지시 2026-09-06)
     if not anchors:
@@ -126,7 +137,7 @@ def _scene(E, q):
     temp = max(0.1, float(q.get("temp", ["1.0"])[0])); seed = int(q.get("seed", ["0"])[0] or 0); fixed = json.loads(q.get("fixed", ["{}"])[0])
     bg = q.get("bg", [""])[0] or ("real" if q.get("fill", [""])[0] == "1" else "auto"); seg = q.get("seg", ["all"])[0]; frame = q.get("frame", ["auto"])[0]   # fill= 은 옛 호출 호환
     if not anchor or any(a not in E.TID for a in anchor) or (act and act not in E.TID):
-        return {"error": "사전에 없는 태그"}
+        return {"error": M("사전에 없는 태그")}
     with E.LOCK:
         t0 = time.time()
         d = E.roll_scene(anchor, rating, act, temp, fixed, seed, bg, seg, frame,
@@ -142,7 +153,7 @@ def _expr(E, q):
     seg = q.get("seg", ["all"])[0]
     exclude = [t for t in q.get("exclude", [""])[0].split(",") if t] + (sorted(E.MULTI_ONLY) if E._people(q) == 1 else [])
     if not anchor or any(a not in E.TID for a in anchor) or (act and act not in E.TID):
-        return {"error": "사전에 없는 태그"}
+        return {"error": M("사전에 없는 태그")}
     with E.LOCK:
         t0 = time.time()
         d = E.roll_expr(anchor, rating, act, temp, fixed, seed, seg, exclude, E._charcap(q), E._design(q), E._cos(q), E._must(q), E._on(q))
@@ -156,7 +167,7 @@ def _pose(E, q):
     seg = q.get("seg", ["all"])[0]
     exclude = [t for t in q.get("exclude", [""])[0].split(",") if t] + (sorted(E.MULTI_ONLY) if E._people(q) == 1 else [])
     if not anchor or any(a not in E.TID for a in anchor) or (act and act not in E.TID):
-        return {"error": "사전에 없는 태그"}
+        return {"error": M("사전에 없는 태그")}
     with E.LOCK:
         t0 = time.time()
         d = E.roll_pose(anchor, rating, act, temp, fixed, seed, seg, exclude, E._charcap(q), E._design(q), E._cos(q), E._must(q), E._on(q))
@@ -170,7 +181,7 @@ def _nsfw(E, q):
     act = fixed.pop("act", "") or ""
     level = int(q.get("level", ["2"])[0]); nude = q.get("bare", ["0"])[0] == "1"; nude_tag = q.get("nudetag", [""])[0]
     if act and act not in E.TID:
-        return {"error": f"사전에 없는 태그: {act}"}
+        return {"error": M("사전에 없는 태그: {tags}", tags=act)}
     with E.LOCK:
         t0 = time.time()
         d = E.roll_nsfw(act, temp, fixed, seed, body, design, level, nude, nude_tag, E._excl(q), E._must(q), E._on(q))

@@ -22,6 +22,7 @@
 -->
 <link rel="stylesheet" href="/plug/_app/base.css">
 <script src="/plug/_app/peropix.js"></script>
+<script src="i18n.js"></script>
 <style>
 /* 도구줄 */
 header input[type=text]{width:min(320px,42vw)}
@@ -106,88 +107,99 @@ main h3 .note{font-weight:var(--w-norm);font-size:var(--text-2xs);color:var(--in
 </head>
 <body>
 <header>
- <div style="position:relative"><input id="tag" type="text" placeholder="태그 (쉼표로 여러 개: white_thighhighs, serafuku)" autocomplete="off"><div id="sug" hidden></div></div>
- <div style="position:relative"><input id="excl" type="text" placeholder="제외 태그 (여기 적은 태그는 어느 모듈에서도 안 뽑힘)" autocomplete="off" title="쉼표로 여러 개. 디자인·NSFW·포즈·씬 모든 후보에서 뺍니다"><div id="sug2" hidden></div></div>
- <label>온도 <input id="temp" type="range" min="0.3" max="2.5" step="0.1" value="1.0" oninput="tv.textContent=this.value"> <span id="tv">1.0</span></label>
- <details id="tdet" title="모듈마다 온도를 따로 정합니다. 「전체 따름」이면 위 슬라이더 값을 씁니다"><summary>모듈별 온도</summary>
+ <div style="position:relative"><input id="tag" type="text" data-t-ph="태그 (쉼표로 여러 개: white_thighhighs, serafuku)" autocomplete="off"><div id="sug" hidden></div></div>
+ <div style="position:relative"><input id="excl" type="text" data-t-ph="제외 태그 (여기 적은 태그는 어느 모듈에서도 안 뽑힘)" autocomplete="off" data-t-title="쉼표로 여러 개. 디자인·NSFW·포즈·씬 모든 후보에서 뺍니다"><div id="sug2" hidden></div></div>
+ <label><span data-t="온도">온도</span> <input id="temp" type="range" min="0.3" max="2.5" step="0.1" value="1.0" oninput="tv.textContent=this.value"> <span id="tv">1.0</span></label>
+ <details id="tdet" data-t-title="모듈마다 온도를 따로 정합니다. 「전체 따름」이면 위 슬라이더 값을 씁니다"><summary data-t="모듈별 온도">모듈별 온도</summary>
   <div class="tgrid"><!--MODTEMPS--></div></details>
- <label><select id="rating"><option value="all">전 등급</option><option value="gs">전연령만</option></select></label>
- <button onclick="roll(true)">굴리기</button>
- <button class="primary" onclick="rollAndPut(this)" title="굴린 뒤 결과를 바로 지금 씬에 넣습니다 (내가 넣었던 블록은 먼저 지웁니다)">굴리기+넣기</button>
- <label>시드 <input id="seed" type="text" style="width:90px;font-size:13px;padding:4px"></label>
+ <label><select id="rating"><option value="all" data-t="전 등급">전 등급</option><option value="gs" data-t="전연령만">전연령만</option></select></label>
+ <button onclick="roll(true)" data-t="굴리기">굴리기</button>
+ <button class="primary" onclick="rollAndPut(this)" data-t-title="굴린 뒤 결과를 바로 지금 씬에 넣습니다 (내가 넣었던 블록은 먼저 지웁니다)" data-t="굴리기+넣기">굴리기+넣기</button>
+ <label><span data-t="시드">시드</span> <input id="seed" type="text" style="width:90px;font-size:13px;padding:4px"></label>
 </header>
 <main>
 <section id="gate" class="card">
- <h2>색인을 내려받아야 굴릴 수 있습니다</h2>
- <p class="meta" id="g_what">danbooru 색인 <b id="g_size">약 960MB</b> — 태그가 함께 쓰인 빈도를 재는 표입니다. 한 번 받으면 계속 씁니다.</p>
+ <h2 data-t="색인을 내려받아야 굴릴 수 있습니다">색인을 내려받아야 굴릴 수 있습니다</h2>
+ <p class="meta" id="g_what"><span data-t="danbooru 색인">danbooru 색인</span> <b id="g_size">약 960MB</b> <span data-t="— 태그가 함께 쓰인 빈도를 재는 표입니다. 한 번 받으면 계속 씁니다.">— 태그가 함께 쓰인 빈도를 재는 표입니다. 한 번 받으면 계속 씁니다.</span></p>
  <div class="bar"><i id="g_fill"></i></div>
- <p class="meta" id="g_state">확인하는 중…</p>
+ <p class="meta" id="g_state" data-t="확인하는 중…">확인하는 중…</p>
  <div class="row">
-  <button class="primary" id="g_go">색인 내려받기</button>
-  <button id="g_stop" hidden>멈추기</button>
+  <button class="primary" id="g_go" data-t="색인 내려받기">색인 내려받기</button>
+  <button id="g_stop" hidden data-t="멈추기">멈추기</button>
   <span class="spacer"></span>
   <span class="meta" id="g_dir"></span>
  </div>
 </section>
 <div id="work">
 <details class="card" id="optbox">
- <summary>옵션 — 표본 · 모듈 · 배경</summary>
+ <summary data-t="옵션 — 표본 · 모듈 · 배경">옵션 — 표본 · 모듈 · 배경</summary>
  <div class="row" style="margin-top:8px">
-  <label title="같은 캐릭터 태그의 그림을 표본에 이 장수까지만 넣습니다. 작은 표본에서 인기 캐릭터 한 명이 디자인을 지배하는 것을 막습니다 (오리지널 그림은 상한 없음). 「없음」이면 순수 빈도"><select id="charcap" onchange="roll(false)"><option value="0">캐릭터당 상한 없음</option><option value="30">캐릭터당 30장</option><option value="100" selected>캐릭터당 100장</option><option value="300">캐릭터당 300장</option></select></label>
-  <label title="켜면 동물귀·꼬리 계열 태그를 후보에서 뺍니다. 끄면 다른 태그와 똑같이 확률대로 나옵니다"><input type="checkbox" id="nokemono" onchange="roll(false)"> 수인 제외</label>
-  <label title="켜면 흔한 조합 대신 이 앵커에서 유독 같이 쓰이는 태그 쪽으로 뽑습니다 (conf × lift^0.8)"><input type="checkbox" id="focus" onchange="roll(false)"> 앵커 특화</label>
-  <label title="누드 = 몸에 입는 옷만 벗습니다(스타킹·장갑·머리 장식·목걸이·신발은 통계대로 남습니다). 완전 누드 = 착용 슬롯 전부를 끕니다. 꺼지는 슬롯은 아래 패널에서 회색으로 보입니다">착의 <select id="mode" onchange="applyMode()"><option value="dressed">전부 입기</option><option value="nude">누드 (몸에 입는 옷만)</option><option value="bare">완전 누드 (착용 전부)</option></select></label>
+  <label data-t-title="같은 캐릭터 태그의 그림을 표본에 이 장수까지만 넣습니다. 작은 표본에서 인기 캐릭터 한 명이 디자인을 지배하는 것을 막습니다 (오리지널 그림은 상한 없음). 「없음」이면 순수 빈도"><select id="charcap" onchange="roll(false)"><option value="0" data-t="캐릭터당 상한 없음">캐릭터당 상한 없음</option><option value="30" data-t="캐릭터당 30장">캐릭터당 30장</option><option value="100" selected data-t="캐릭터당 100장">캐릭터당 100장</option><option value="300" data-t="캐릭터당 300장">캐릭터당 300장</option></select></label>
+  <label data-t-title="켜면 동물귀·꼬리 계열 태그를 후보에서 뺍니다. 끄면 다른 태그와 똑같이 확률대로 나옵니다"><input type="checkbox" id="nokemono" onchange="roll(false)"> <span data-t="수인 제외">수인 제외</span></label>
+  <label data-t-title="켜면 흔한 조합 대신 이 앵커에서 유독 같이 쓰이는 태그 쪽으로 뽑습니다 (conf × lift^0.8)"><input type="checkbox" id="focus" onchange="roll(false)"> <span data-t="앵커 특화">앵커 특화</span></label>
+  <label data-t-title="누드 = 몸에 입는 옷만 벗습니다(스타킹·장갑·머리 장식·목걸이·신발은 통계대로 남습니다). 완전 누드 = 착용 슬롯 전부를 끕니다. 꺼지는 슬롯은 아래 패널에서 회색으로 보입니다"><span data-t="착의">착의</span> <select id="mode" onchange="applyMode()"><option value="dressed" data-t="전부 입기">전부 입기</option><option value="nude" data-t="누드 (몸에 입는 옷만)">누드 (몸에 입는 옷만)</option><option value="bare" data-t="완전 누드 (착용 전부)">완전 누드 (착용 전부)</option></select></label>
   <span class="sep"></span>
   <label><input type="checkbox" id="nsfw_on" checked onchange="nroll(false)"> NSFW</label>
-  <label>강도 <select id="level" onchange="nroll(false)"><option value="1">약</option><option value="2" selected>중</option><option value="3">강</option></select></label>
-  <label><input type="checkbox" id="lockact" onchange="nroll(false)"> 체위 고정</label>
+  <label><span data-t="강도">강도</span> <select id="level" onchange="nroll(false)"><option value="1" data-t="약">약</option><option value="2" selected data-t="중">중</option><option value="3" data-t="강">강</option></select></label>
+  <label><input type="checkbox" id="lockact" onchange="nroll(false)"> <span data-t="체위 고정">체위 고정</span></label>
   <span class="sep"></span>
-  <label><input type="checkbox" id="expr_on" checked onchange="xroll(false)"> 표정</label>
-  <label><input type="checkbox" id="pose_on" checked onchange="proll(false)"> 포즈</label>
-  <label><input type="checkbox" id="scene_on" checked onchange="sroll(false)"> 씬</label>
-  <label title="1 이면 여러 명이 있어야 성립하는 태그(eye contact·looking at another·straddling·pov)를 후보에서 뺍니다. 2 이상이면 그 태그를 되돌리고 디자인·표정·포즈를 인물 수만큼 따로 굴립니다 (씬은 한 벌)">인원 <select id="people" onchange="roll(false)"><option value="1">1명</option><option value="2">2명</option><option value="3">3명</option></select></label>
-  <label>배경 <select id="bg" onchange="sroll(false)"><option value="auto">통계대로</option><option value="simple">단순</option><option value="real">실경</option></select></label>
-  <label title="배경 유형 후보에서 흰·투명·회색만 뺍니다. 유채색·그라데이션·무늬는 그대로 나오고, 단순/실경 갈래 비율도 안 바뀝니다"><input type="checkbox" id="nowhite" onchange="sroll(false)"> 흰·회색 배경 제외</label>
-  <select id="frame_sel" onchange="sroll(false)" title="구도 슬롯의 켜기·끄기는 아래 「씬」 패널의 프레이밍에서 합니다. 여기서는 자동으로 뽑을지 특정 구도로 고정할지만 정합니다"><option value="auto">구도 자동</option><!--FRAMES--></select>
+  <label><input type="checkbox" id="expr_on" checked onchange="xroll(false)"> <span data-t="표정">표정</span></label>
+  <label><input type="checkbox" id="pose_on" checked onchange="proll(false)"> <span data-t="포즈">포즈</span></label>
+  <label><input type="checkbox" id="scene_on" checked onchange="sroll(false)"> <span data-t="씬">씬</span></label>
+  <label data-t-title="1 이면 여러 명이 있어야 성립하는 태그(eye contact·looking at another·straddling·pov)를 후보에서 뺍니다. 2 이상이면 그 태그를 되돌리고 디자인·표정·포즈를 인물 수만큼 따로 굴립니다 (씬은 한 벌)"><span data-t="인원">인원</span> <select id="people" onchange="roll(false)"><option value="1" data-t="1명">1명</option><option value="2" data-t="2명">2명</option><option value="3" data-t="3명">3명</option></select></label>
+  <label><span data-t="배경">배경</span> <select id="bg" onchange="sroll(false)"><option value="auto" data-t="통계대로">통계대로</option><option value="simple" data-t="단순">단순</option><option value="real" data-t="실경">실경</option></select></label>
+  <label data-t-title="배경 유형 후보에서 흰·투명·회색만 뺍니다. 유채색·그라데이션·무늬는 그대로 나오고, 단순/실경 갈래 비율도 안 바뀝니다"><input type="checkbox" id="nowhite" onchange="sroll(false)"> <span data-t="흰·회색 배경 제외">흰·회색 배경 제외</span></label>
+  <select id="frame_sel" onchange="sroll(false)" data-t-title="구도 슬롯의 켜기·끄기는 아래 「씬」 패널의 프레이밍에서 합니다. 여기서는 자동으로 뽑을지 특정 구도로 고정할지만 정합니다"><option value="auto" data-t="구도 자동">구도 자동</option><!--FRAMES--></select>
 </div>
 </details>
  <details class="card" id="pickbox" open>
-  <summary>굴릴 부위 고르기</summary>
+  <summary data-t="굴릴 부위 고르기">굴릴 부위 고르기</summary>
   <div id="bodymap"></div>
  </details>
  <div id="top"></div>
  <div id="ptabs"></div>
  <div id="slots"></div>
  <div class="meta" id="meta"></div>
- <h3 style="margin-top:28px;display:flex;gap:12px;align-items:center">NSFW 모듈 <button onclick="nroll(true)" style="font-size:14px;padding:6px 14px;border:0;border-radius:6px;background:#c0392b;color:#fff;cursor:pointer">체위만 다시</button>
+ <h3 style="margin-top:28px;display:flex;gap:12px;align-items:center"><span data-t="NSFW 모듈">NSFW 모듈</span> <button onclick="nroll(true)" style="font-size:14px;padding:6px 14px;border:0;border-radius:6px;background:#c0392b;color:#fff;cursor:pointer" data-t="체위만 다시">체위만 다시</button>
 
-  <span style="font-size:13px;font-weight:400;color:#777">위 굴리기가 디자인과 함께 굴린다 · e 등급 여성 그림 표본 · 가슴 크기를 조건으로 씀 · 옷 상태에 따라 디자인의 옷을 걷어 냄</span></h3>
+  <span style="font-size:13px;font-weight:400;color:#777" data-t="위 굴리기가 디자인과 함께 굴린다 · e 등급 여성 그림 표본 · 가슴 크기를 조건으로 씀 · 옷 상태에 따라 디자인의 옷을 걷어 냄">위 굴리기가 디자인과 함께 굴린다 · e 등급 여성 그림 표본 · 가슴 크기를 조건으로 씀 · 옷 상태에 따라 디자인의 옷을 걷어 냄</span></h3>
  <div id="nslots"></div>
  <div class="meta" id="nmeta"></div>
- <h3 style="margin-top:28px;display:flex;gap:12px;align-items:center">표정 모듈 <button onclick="xroll(true)" style="font-size:14px;padding:6px 14px;border:0;border-radius:6px;background:#b5651d;color:#fff;cursor:pointer">표정만 다시</button>
+ <h3 style="margin-top:28px;display:flex;gap:12px;align-items:center"><span data-t="표정 모듈">표정 모듈</span> <button onclick="xroll(true)" style="font-size:14px;padding:6px 14px;border:0;border-radius:6px;background:#b5651d;color:#fff;cursor:pointer" data-t="표정만 다시">표정만 다시</button>
 
-  <span style="font-size:13px;font-weight:400;color:#777">감정 → 입 → 눈 → 눈썹 → 볼·상태(둘까지) → 시선 · 표본은 포즈·씬과 같음 · 후보 컷 없음 · NSFW 가 고른 태그는 뺌</span></h3>
+  <span style="font-size:13px;font-weight:400;color:#777" data-t="감정 → 입 → 눈 → 눈썹 → 볼·상태(둘까지) → 시선 · 표본은 포즈·씬과 같음 · 후보 컷 없음 · NSFW 가 고른 태그는 뺌">감정 → 입 → 눈 → 눈썹 → 볼·상태(둘까지) → 시선 · 표본은 포즈·씬과 같음 · 후보 컷 없음 · NSFW 가 고른 태그는 뺌</span></h3>
  <div id="xslots"></div>
  <div class="meta" id="xmeta"></div>
- <h3 style="margin-top:28px;display:flex;gap:12px;align-items:center">포즈 모듈 <button onclick="proll(true)" style="font-size:14px;padding:6px 14px;border:0;border-radius:6px;background:#7b5ea7;color:#fff;cursor:pointer">포즈만 다시</button>
+ <h3 style="margin-top:28px;display:flex;gap:12px;align-items:center"><span data-t="포즈 모듈">포즈 모듈</span> <button onclick="proll(true)" style="font-size:14px;padding:6px 14px;border:0;border-radius:6px;background:#7b5ea7;color:#fff;cursor:pointer" data-t="포즈만 다시">포즈만 다시</button>
 
-  <span style="font-size:13px;font-weight:400;color:#777">자세 → 팔 → 손짓 → 다리 → 몸통 → 소지 · 표본은 씬과 같음 · NSFW 가 고른 태그는 뺌</span></h3>
+  <span style="font-size:13px;font-weight:400;color:#777" data-t="자세 → 팔 → 손짓 → 다리 → 몸통 → 소지 · 표본은 씬과 같음 · NSFW 가 고른 태그는 뺌">자세 → 팔 → 손짓 → 다리 → 몸통 → 소지 · 표본은 씬과 같음 · NSFW 가 고른 태그는 뺌</span></h3>
  <div id="pslots"></div>
  <div class="meta" id="pmeta"></div>
- <h3 style="margin-top:28px;display:flex;gap:12px;align-items:center">씬 모듈 <button onclick="sroll(true)" style="font-size:14px;padding:6px 14px;border:0;border-radius:6px;background:#2c7a7b;color:#fff;cursor:pointer">씬만 다시</button>
+ <h3 style="margin-top:28px;display:flex;gap:12px;align-items:center"><span data-t="씬 모듈">씬 모듈</span> <button onclick="sroll(true)" style="font-size:14px;padding:6px 14px;border:0;border-radius:6px;background:#2c7a7b;color:#fff;cursor:pointer" data-t="씬만 다시">씬만 다시</button>
 
-  <span style="font-size:13px;font-weight:400;color:#777">장소 → 시간 → 조명 → 효과 → 프레이밍 → 각도 · NSFW 가 있으면 체위의 e 등급 표본, 없으면 디자인 앵커의 표본</span></h3>
+  <span style="font-size:13px;font-weight:400;color:#777" data-t="장소 → 시간 → 조명 → 효과 → 프레이밍 → 각도 · NSFW 가 있으면 체위의 e 등급 표본, 없으면 디자인 앵커의 표본">장소 → 시간 → 조명 → 효과 → 프레이밍 → 각도 · NSFW 가 있으면 체위의 e 등급 표본, 없으면 디자인 앵커의 표본</span></h3>
  <div id="sslots"></div>
  <div class="meta" id="smeta"></div>
 </div>
 </main>
 <footer>
- <span id="f_state">색인 확인 중…</span>
+ <span id="f_state" data-t="색인 확인 중…">색인 확인 중…</span>
  <span class="spacer"></span>
- <button class="ghost" id="f_manage">색인 관리</button>
+ <button class="ghost" id="f_manage" data-t="색인 관리">색인 관리</button>
 </footer>
 <script>
 let fixed={}, cur=null, scur=null, sfixed={}, sseed=0, SL=null, pcur=null, pfixed={}, pseed=0, xcur=null, xfixed={}, xseed=0;
+// ── 문구 (사전은 `i18n.js`. 한국어 원문이 키다) ──────────────────────────────
+// ★서버가 내는 오류는 「앞머리: 값」 꼴이라, 앞머리만 사전에서 찾고 값은 그대로 둔다.
+function SE(m){m=String(m||'');const i=m.indexOf(': ');
+ if(i>0){const h=m.slice(0,i);const tr=T(h);if(tr!==h)return tr+': '+m.slice(i+2)}
+ return T(m)}
+const LOC=()=>({ko:'ko-KR',en:'en-US',ja:'ja-JP'})[tagrollLang()]||'ko-KR';
+/** 조건 줄 — 조건이 있으면 개수, 없으면 「표본만」·「행위만」 */
+const condN=(s,none)=>(s.cond&&s.cond.length)?T('조건 {n}개',{n:s.cond.length}):T(none);
+/** 부위 줄의 장수·다중 슬롯 꼬리 */
+const nImg=n=>T('{n}장',{n:n.toLocaleString(LOC())});
+const kTail=s=>s.k>1?' · '+T('최대 {k}개 (칩을 눌러 더하거나 뺌)',{k:s.k}):'';
 // ---- 인원수 (사용자 지시 2026-09-08) ----
 // 인물마다 디자인·표정·포즈를 따로 굴린다. 씬·NSFW 는 한 벌이고 인물 1 의 디자인을 조건으로 쓴다.
 // 화면은 탭으로 한 인물씩 보여 준다 — 슬롯이 인물당 33개라 늘어놓으면 훑기 어렵다. 위 묶음에는 인물별 전체 태그가 뜬다.
@@ -197,7 +209,7 @@ function syncSel(){const p=P[sel]||blankPerson();cur=p.cur;xcur=p.xcur;pcur=p.pc
 function selPerson(i){sel=i;syncSel();
  renderTabs();if(cur)render(cur);if(xcur)xrender(xcur);else $('#xslots').innerHTML='';if(pcur)prender(pcur);else $('#pslots').innerHTML=''}
 function renderTabs(){
- $('#ptabs').innerHTML=PN>1?Array.from({length:PN},(_,i)=>`<button class="${i===sel?'on':''}" onclick="selPerson(${i})">인물 ${i+1}</button>`).join(''):'';}
+ $('#ptabs').innerHTML=PN>1?Array.from({length:PN},(_,i)=>`<button class="${i===sel?'on':''}" onclick="selPerson(${i})">${T('인물 {n}',{n:i+1})}</button>`).join(''):'';}
 function personText(i){const p=P[i]||{};
  const d=(i===0&&ncur&&$('#nsfw_on').checked)?ncur.prompt:(p.cur?p.cur.prompt:'');
  return [d,p.xcur?p.xcur.prompt:'',p.pcur?p.pcur.prompt:''].filter(Boolean).join(', ')}
@@ -217,16 +229,16 @@ function groupOff(){if(!SL)return new Set();const m=$('#mode').value;
  return new Set(m==='nude'?SL.nude_off:(m==='bare'?SL.bare_off:[]))}
 function isMuted(m,k){return m==='design'&&groupOff().has(k)}
 function tri(m,k,label){const cls='tri s'+stOf(m,k)+(isMuted(m,k)?' muted':'');
- return `<span class="${cls}" onclick="cycle('${m}','${k}')" title="눌러서 꺼짐 → 통계대로 → 반드시">${label}</span>`}
+ return `<span class="${cls}" onclick="cycle('${m}','${k}')" title="${T('눌러서 꺼짐 → 통계대로 → 반드시')}">${T(label)}</span>`}
 function renderPanel(){if(!SL)return;
- const zones=SL.zones.map(([z,keys])=>`<div class="zone"><b>${z}</b>`+keys.map(k=>{const sl=SL.slots.find(x=>x.key===k);return sl?tri('design',k,sl.label):''}).join('')+`</div>`).join('');
- let h=`<div class="mod"><h4>디자인 <span class="hint">☐ 안 뽑음 · ☑ 통계대로(「없음」 포함) · ★ 반드시 뽑기</span></h4><div class="dz">${SVG}<div class="zones">${zones}</div></div></div>`;
- (SL.modules||[]).forEach(mo=>{h+=`<div class="mod"><h4>${mo.label}</h4>`+mo.slots.map(sl=>tri(mo.key,sl.key,sl.label)).join('')+`</div>`});
- h+=`<div class="mod"><h4>장르 <span class="hint">세계관 · 작품으로 판정 · 여럿 고르면 풀이 넓어집니다 · 배경에도 영향</span></h4>`+SL.genres.map(g=>tri2('genre',g.key,g.label)).join('')+`</div>`;
- h+=`<div class="mod"><h4>복식 <span class="hint">인물 의상 · 태그로 판정 · 여럿 고르면 풀이 넓어집니다 · 배경에는 영향 없음</span></h4>`+SL.costumes.map(c=>tri2('cos',c.key,c.label)).join('')+`</div>`;
+ const zones=SL.zones.map(([z,keys])=>`<div class="zone"><b>${T(z)}</b>`+keys.map(k=>{const sl=SL.slots.find(x=>x.key===k);return sl?tri('design',k,sl.label):''}).join('')+`</div>`).join('');
+ let h=`<div class="mod"><h4>${T('디자인')} <span class="hint">${T('☐ 안 뽑음 · ☑ 통계대로(「없음」 포함) · ★ 반드시 뽑기')}</span></h4><div class="dz">${SVG}<div class="zones">${zones}</div></div></div>`;
+ (SL.modules||[]).forEach(mo=>{h+=`<div class="mod"><h4>${T(mo.label)}</h4>`+mo.slots.map(sl=>tri(mo.key,sl.key,sl.label)).join('')+`</div>`});
+ h+=`<div class="mod"><h4>${T('장르')} <span class="hint">${T('세계관 · 작품으로 판정 · 여럿 고르면 풀이 넓어집니다 · 배경에도 영향')}</span></h4>`+SL.genres.map(g=>tri2('genre',g.key,g.label)).join('')+`</div>`;
+ h+=`<div class="mod"><h4>${T('복식')} <span class="hint">${T('인물 의상 · 태그로 판정 · 여럿 고르면 풀이 넓어집니다 · 배경에는 영향 없음')}</span></h4>`+SL.costumes.map(c=>tri2('cos',c.key,c.label)).join('')+`</div>`;
  $('#bodymap').innerHTML=h}
 // 장르·복식은 2단이다 (꺼짐 ☐ / 켜짐 ☑) — 슬롯과 달리 「반드시」가 없다. 개수 제한 없이 OR 로 풀을 넓힌다.
-function tri2(m,k,label){return `<span class="tri ${stOf(m,k)?'s1':''}" onclick="cycle2('${m}','${k}')" title="눌러서 켜고 끕니다">${label}</span>`}
+function tri2(m,k,label){return `<span class="tri ${stOf(m,k)?'s1':''}" onclick="cycle2('${m}','${k}')" title="${T('눌러서 켜고 끕니다')}">${T(label)}</span>`}
 function cycle2(m,k){ST[skey(m,k)]=stOf(m,k)?0:1;renderPanel();roll(false)}
 function cycle(m,k){if(isMuted(m,k))return;ST[skey(m,k)]=(stOf(m,k)+1)%3;renderPanel();roll(false)}
 function applyMode(){renderPanel();roll(false)}
@@ -238,12 +250,12 @@ function reqSet(m){if(!SL)return '';const off=groupOff();
 function fillTemps(){const g=document.querySelector('#tdet .tgrid');if(!g||g.dataset.on)return;g.dataset.on='1';
  const vals=[];for(let v=3;v<=25;v++)vals.push((v/10).toFixed(1));
  g.innerHTML=[['design','디자인'],['nsfw','NSFW'],['expr','표정'],['pose','포즈'],['scene','씬']].map(([m,l])=>
-  '<label>'+l+'</label><select id="t_'+m+'" onchange="tempChanged(\''+m+'\')"><option value="">전체 따름</option>'+
+  '<label>'+T(l)+'</label><select id="t_'+m+'" onchange="tempChanged(\''+m+'\')"><option value="">'+T('전체 따름')+'</option>'+
   vals.map(v=>'<option value="'+v+'">'+v+'</option>').join('')+'</select>').join('')}
 function fillFrames(list){const s=$('#frame_sel');if(!s||s.dataset.on)return;s.dataset.on='1';
  s.insertAdjacentHTML('beforeend',list.map(t=>'<option value="'+t+'">'+t.replace(/_/g,' ')+'</option>').join(''))}
-async function loadSlots(){const r=await fetch('../api/slots');SL=await r.json();
- if(SL.error){$('#meta').textContent='색인 오류: '+SL.error;return}
+async function loadSlots(){const r=await fetch('../api/slots?lang='+tagrollLang());SL=await r.json();
+ if(SL.error){$('#meta').textContent=T('색인 오류: {e}',{e:SE(SL.error)});return}
  fillTemps();fillFrames(SL.frames||[]);
  SL.slots.forEach(s=>ST[skey('design',s.key)]=SL.default_off.includes(s.key)?0:1);
  (SL.modules||[]).forEach(mo=>mo.slots.forEach(s=>ST[skey(mo.key,s.key)]=1));
@@ -252,15 +264,15 @@ async function loadSlots(){const r=await fetch('../api/slots');SL=await r.json()
 //  씬이 전부 「없음」으로 나오면 묶음 줄이 「굴리는 중…」에 머물러 멈춘 것처럼 보였다. NSFW 를 켜면 씬 표본이
 //  체위 표본이라 배경 태그가 드물어 자주 그랬다).
 function setBundle(id,text,empty){const el=$('#'+id);if(!el)return;
- const none=text===''; const t=none?'(전부 없음)':(text||empty);
+ const none=text===''; const t=none?T('(전부 없음)'):(text||empty);
  el.textContent=t;el.classList.toggle('empty',!text)}
-const bundleRow=(id,label)=>`<div class="bundle"><span class="k">${label}</span><span class="v empty" id="${id}">굴리면 여기에 뜹니다</span><span class="btns"><button onclick="copyText('${id}',this)">복사</button><button onclick="sendOne('${id}',this)">넣기</button></span></div>`;
+const bundleRow=(id,label)=>`<div class="bundle"><span class="k">${label}</span><span class="v empty" id="${id}">${T('굴리면 여기에 뜹니다')}</span><span class="btns"><button onclick="copyText('${id}',this)">${T('복사')}</button><button onclick="sendOne('${id}',this)">${T('넣기')}</button></span></div>`;
 // 묶음 줄: 인원 1 이면 모듈별(디자인·표정·포즈), 2 이상이면 인물별(디자인+표정+포즈를 한 덩어리로 — 사용자 지시 2026-09-08 「캐릭터 단위로 뽑은건 인물별로 묶어줄것」)
 function buildTop(){
- const head=PN>1?Array.from({length:PN},(_,i)=>bundleRow('b_p'+i,'인물 '+(i+1))).join('')
-                :bundleRow('b_design','디자인')+bundleRow('b_expr','표정')+bundleRow('b_pose','포즈');
- $('#top').innerHTML=head+bundleRow('b_nsfw','NSFW')+bundleRow('b_scene','씬')
-  +`<div class="all"><span class="meta" id="b_note"></span><button onclick="copyAll(this)">전체 복사</button><button class="primary" onclick="sendAll(this)">지금 씬에 넣기</button></div>`}
+ const head=PN>1?Array.from({length:PN},(_,i)=>bundleRow('b_p'+i,T('인물 {n}',{n:i+1}))).join('')
+                :bundleRow('b_design',T('디자인'))+bundleRow('b_expr',T('표정'))+bundleRow('b_pose',T('포즈'));
+ $('#top').innerHTML=head+bundleRow('b_nsfw','NSFW')+bundleRow('b_scene',T('씬'))
+  +`<div class="all"><span class="meta" id="b_note"></span><button onclick="copyAll(this)">${T('전체 복사')}</button><button class="primary" onclick="sendAll(this)">${T('지금 씬에 넣기')}</button></div>`}
 // ★buildTop() 을 여기서 바로 부르면 안 된다 — $ 가 아래에서 const 로 선언돼 있어 TDZ 오류가 나고, 그러면 스크립트 평가가 통째로 멈춰 화면이 죽는다 (2026-09-08 실측).
 // loadSlots() 의 await 뒤에서 부른다.
 // ★한 모듈이 실패해도 사슬은 이어 간다 (사용자 지적 2026-09-08 「nsfw가 켜져있으면 씬이 굴리는 중이 안 끝난다」).
@@ -270,33 +282,36 @@ function buildTop(){
 let FAILED={};
 async function jget(url,metaSel,key){
  try{const r=await fetch(url);const d=await r.json();
-  if(d&&d.error){FAILED[key]=d.error;$(metaSel).textContent='오류: '+d.error;return null}
+  if(d&&d.error){FAILED[key]=SE(d.error);$(metaSel).textContent=T('오류: {e}',{e:SE(d.error)});return null}
   delete FAILED[key];return d}
- catch(e){FAILED[key]='요청 실패 ('+e.message+')';$(metaSel).textContent='요청 실패: '+e.message+' — 서버 콘솔을 확인하세요';return null}}
-const waitTxt=k=>FAILED[k]?('실패: '+FAILED[k]):'굴리는 중…';
+ catch(e){FAILED[key]=T('요청 실패 ({e})',{e:e.message});$(metaSel).textContent=T('요청 실패: {e} — 서버 콘솔을 확인하세요',{e:e.message});return null}}
+const waitTxt=k=>FAILED[k]?T('실패: {e}',{e:FAILED[k]}):T('굴리는 중…');
 function updateTop(){
  if($('#top').children.length!==(PN>1?PN+3:6))buildTop();   // 인물별 PN개 또는 모듈별 3개 + NSFW·씬·전체복사
- if(PN>1)for(let i=0;i<PN;i++)setBundle('b_p'+i,P[i]&&P[i].cur?personText(i):null,'굴리면 여기에 뜹니다');
- else{setBundle('b_design',cur?cur.prompt:null,'굴리면 여기에 뜹니다');
-  setBundle('b_expr',xcur?xcur.prompt:null,!$('#expr_on').checked?'꺼짐':(cur?waitTxt('expr'):'굴리면 여기에 뜹니다'));
-  setBundle('b_pose',pcur?pcur.prompt:null,!$('#pose_on').checked?'꺼짐':(cur?waitTxt('pose'):'굴리면 여기에 뜹니다'))}
- setBundle('b_nsfw',ncur?ncur.nsfw_tags.map(t=>t.replace(/_/g,' ')).join(', '):null,!$('#nsfw_on').checked?'꺼짐':(cur?waitTxt('nsfw'):'체위를 굴리면 여기에 뜹니다'));
- setBundle('b_scene',scur?scur.prompt:null,!$('#scene_on').checked?'꺼짐':(cur?waitTxt('scene'):'굴리면 여기에 뜹니다'));
- const n=$('#b_note');if(n)n.textContent=(PN>1?`전체 = ${PN}girls + 인물마다 (디자인+표정+포즈)`:(ncur&&ncur.stripped.length?`전체 = 디자인에서 ${ncur.stripped.join(', ')} 를 걷어낸 것 + NSFW`:(ncur?'전체 = 디자인 + NSFW':'전체 = 디자인'))+(xcur?' + 표정':'')+(pcur?' + 포즈':''))+(scur?' + 씬':'')}
+ const WAIT=T('굴리면 여기에 뜹니다'), OFF=T('꺼짐');
+ if(PN>1)for(let i=0;i<PN;i++)setBundle('b_p'+i,P[i]&&P[i].cur?personText(i):null,WAIT);
+ else{setBundle('b_design',cur?cur.prompt:null,WAIT);
+  setBundle('b_expr',xcur?xcur.prompt:null,!$('#expr_on').checked?OFF:(cur?waitTxt('expr'):WAIT));
+  setBundle('b_pose',pcur?pcur.prompt:null,!$('#pose_on').checked?OFF:(cur?waitTxt('pose'):WAIT))}
+ setBundle('b_nsfw',ncur?ncur.nsfw_tags.map(t=>t.replace(/_/g,' ')).join(', '):null,!$('#nsfw_on').checked?OFF:(cur?waitTxt('nsfw'):T('체위를 굴리면 여기에 뜹니다')));
+ setBundle('b_scene',scur?scur.prompt:null,!$('#scene_on').checked?OFF:(cur?waitTxt('scene'):WAIT));
+ const n=$('#b_note');if(n)n.textContent=(PN>1?T('전체 = {n}girls + 인물마다 (디자인+표정+포즈)',{n:PN})
+  :(ncur&&ncur.stripped.length?T('전체 = 디자인에서 {tags} 를 걷어낸 것 + NSFW',{tags:ncur.stripped.join(', ')})
+   :(ncur?T('전체 = 디자인 + NSFW'):T('전체 = 디자인')))+(xcur?T(' + 표정'):'')+(pcur?T(' + 포즈'):''))+(scur?T(' + 씬'):'')}
 // 전체 복사: 인물 태그를 인물끼리 붙여 둔다 (디자인·표정·포즈가 인접해야 색이 덜 섞인다 — 사용자 지시 2026-09-08)
 function allText(){
  if(PN>1)return [PN+'girls',...Array.from({length:PN},(_,i)=>personText(i)),scur?scur.prompt:''].filter(Boolean).join(', ');
  const a=(ncur&&$('#nsfw_on').checked)?ncur.prompt:(cur?cur.prompt:'');
  return [a,xcur?xcur.prompt:'',pcur?pcur.prompt:'',scur?scur.prompt:''].filter(Boolean).join(', ')}
-async function copyText(id,btn){const el=$('#'+id);const raw=el.textContent;const t=(el.classList.contains('empty')||raw==='(전부 없음)')?'':raw;if(!t)return;await navigator.clipboard.writeText(t);flash(btn)}
+async function copyText(id,btn){const el=$('#'+id);const raw=el.textContent;const t=(el.classList.contains('empty')||raw===T('(전부 없음)'))?'':raw;if(!t)return;await navigator.clipboard.writeText(t);flash(btn)}
 async function copyAll(btn){const t=allText();if(!t)return;await navigator.clipboard.writeText(t);flash(btn)}
-function flash(btn){const o=btn.textContent;btn.textContent='복사됨';setTimeout(()=>btn.textContent=o,900)}
+function flash(btn){const o=btn.textContent;btn.textContent=T('복사됨');setTimeout(()=>btn.textContent=o,900)}
 const $=s=>document.querySelector(s);
 // 자동완성 (앵커 칸·제외 칸 공용). 마지막 쉼표 뒤 토큰을 찾아 채운다
 function attachSuggest(inp,sug,onPick){
  const lastTok=()=>{const parts=inp.value.split(',');return parts[parts.length-1].trim()};
  inp.addEventListener('input',async()=>{const q=lastTok();if(q.length<2){sug.hidden=true;return}
-  const r=await fetch('../api/tags?q='+encodeURIComponent(q));const a=await r.json();
+  const r=await fetch('../api/tags?q='+encodeURIComponent(q)+'&lang='+tagrollLang());const a=await r.json();
   sug.innerHTML='';a.forEach(t=>{const d=document.createElement('div');d.textContent=t;d.onclick=()=>{const parts=inp.value.split(',');parts[parts.length-1]=t;inp.value=parts.map(x=>x.trim()).filter(Boolean).join(', ');sug.hidden=true;onPick()};sug.appendChild(d)});sug.hidden=!a.length});
  inp.addEventListener('keydown',e=>{if(e.key==='Enter'){sug.hidden=true;onPick()}})}
 attachSuggest($('#tag'),$('#sug'),()=>{fixed={};roll(true)});
@@ -309,7 +324,7 @@ function keepAct(){if($('#lockact').checked){const a=(ncur&&ncur.act)||nfixed.ac
 // 인물 i 의 디자인 하나. 시드는 기준 시드에서 인물마다 갈라 쓴다 (같은 기준 시드면 인물 1 은 늘 같다)
 async function rollOne(i){
  const tag=$('#tag').value.trim(), pp=P[i];
- const p=new URLSearchParams({anchor:tag,temp:tempFor('design'),cos:cosText(),charcap:$('#charcap').value,req:reqSet('design'),rating:$('#rating').value,seg:segText(),seed:pp.seed,mode:$('#mode').value,on:JSON.stringify(onSet('design')),kemono:$('#nokemono').checked?'0':'1',focus:$('#focus').checked?'1':'0',exclude:exclText(),people:PN,fixed:JSON.stringify(pp.fixed)});
+ const p=new URLSearchParams({lang:tagrollLang(),anchor:tag,temp:tempFor('design'),cos:cosText(),charcap:$('#charcap').value,req:reqSet('design'),rating:$('#rating').value,seg:segText(),seed:pp.seed,mode:$('#mode').value,on:JSON.stringify(onSet('design')),kemono:$('#nokemono').checked?'0':'1',focus:$('#focus').checked?'1':'0',exclude:exclText(),people:PN,fixed:JSON.stringify(pp.fixed)});
  const d=await jget('../api/roll?'+p,'#meta','design');
  if(!d){return false}
  pp.cur=d;pp.xcur=null;pp.pcur=null;return true}
@@ -321,7 +336,7 @@ async function roll(newSeed){
   const old=P;P=Array.from({length:PN},(_,i)=>(!newSeed&&old[i])?old[i]:blankPerson());
   P.forEach((pp,i)=>{if(!pp.seed||newSeed){pp.seed=(base+i*7919)%1000000000;pp.xseed=(base+i*104729)%1000000000;pp.pseed=(base+i*15485863)%1000000000;pp.fixed={};pp.xfixed={};pp.pfixed={}}})}
  if(sel>=PN)sel=PN-1;
- $('#meta').textContent='굴리는 중…';
+ $('#meta').textContent=T('굴리는 중…');
  for(let i=0;i<PN;i++){if(!await rollOne(i))return}
  ncur=null;scur=null;syncSel();
  renderTabs();render(cur);$('#nslots').innerHTML='';$('#xslots').innerHTML='';$('#pslots').innerHTML='';$('#sslots').innerHTML='';updateTop();nroll(false)}
@@ -329,22 +344,22 @@ function setFixed(slot,tag){fixed[slot]=tag;roll(false)}
 function designTags(i){const c=(P[i===undefined?sel:i]||{}).cur;return c?c.slots.filter(s=>s.chosen&&!s.anchor).map(s=>s.chosen).join(','):''}   // 디자인이 고른 태그(앵커 제외) — 표정·포즈·씬 질의에 앞세운다 (2026-09-08)
 let nfixed={}, nseed=0, ncur=null;
 async function nroll(newSeed){if(!P.length||!P[0].cur)return;   // NSFW 는 한 벌이고 인물 1 을 대상으로 한다
- if(!$('#nsfw_on').checked){ncur=null;$('#nslots').innerHTML='';$('#nmeta').textContent='NSFW 모듈 꺼짐';updateTop();xroll(false);return}
+ if(!$('#nsfw_on').checked){ncur=null;$('#nslots').innerHTML='';$('#nmeta').textContent=T('NSFW 모듈 꺼짐');updateTop();xroll(false);return}
  if(newSeed){nseed=Math.floor(Math.random()*1e9);keepAct()}
  const c0=P[0].cur;
  const design=c0.slots.filter(s=>s.chosen).map(s=>({slot:s.slot,tag:s.chosen}));
  const body=(c0.slots.find(s=>s.slot==='body')||{}).chosen||'';
- const p=new URLSearchParams({temp:tempFor('nsfw'),req:reqSet('nsfw'),on:JSON.stringify(onSet('nsfw')),seed:nseed,level:$('#level').value,bare:c0.bare?'1':'0',nudetag:c0.nude_tag||'',fixed:JSON.stringify(nfixed),body,design:JSON.stringify(design),exclude:exclText()});
- $('#nmeta').textContent='굴리는 중…';
+ const p=new URLSearchParams({lang:tagrollLang(),temp:tempFor('nsfw'),req:reqSet('nsfw'),on:JSON.stringify(onSet('nsfw')),seed:nseed,level:$('#level').value,bare:c0.bare?'1':'0',nudetag:c0.nude_tag||'',fixed:JSON.stringify(nfixed),body,design:JSON.stringify(design),exclude:exclText()});
+ $('#nmeta').textContent=T('굴리는 중…');
  const d=await jget('../api/nsfw?'+p,'#nmeta','nsfw');if(d){ncur=d;nrender(d)}else{ncur=null;$('#nslots').innerHTML=''}updateTop();xroll(false)}
 // 표정 모듈 (2026-09-07): NSFW 다음, 포즈 앞. 볼·상태 슬롯은 둘까지 뽑으므로 칩을 눌러 더하거나 뺀다 (NSFW 의 다중 슬롯과 같은 방식)
 async function xroll(newSeed){if(!P.length||!P[0].cur)return;
- if(!$('#expr_on').checked){P.forEach(pp=>pp.xcur=null);xcur=null;$('#xslots').innerHTML='';$('#xmeta').textContent='표정 모듈 꺼짐';updateTop();proll(false);return}
+ if(!$('#expr_on').checked){P.forEach(pp=>pp.xcur=null);xcur=null;$('#xslots').innerHTML='';$('#xmeta').textContent=T('표정 모듈 꺼짐');updateTop();proll(false);return}
  if(newSeed)P.forEach(pp=>{pp.xseed=Math.floor(Math.random()*1e9);pp.xfixed={}});
- $('#xmeta').textContent='굴리는 중…';
+ $('#xmeta').textContent=T('굴리는 중…');
  for(let i=0;i<PN;i++){const pp=P[i];
   const ex=[exclText(),(i===0&&ncur&&$('#nsfw_on').checked)?ncur.nsfw_tags.join(','):''].filter(Boolean).join(',');
-  const p=new URLSearchParams({anchor:pp.cur.anchor,rating:$('#rating').value,act:(i===0&&ncur)?ncur.act:'',temp:tempFor('expr'),req:reqSet('expr'),on:JSON.stringify(onSet('expr')),cos:cosText(),charcap:$('#charcap').value,seed:pp.xseed,seg:segText(),exclude:ex,design:designTags(i),people:PN,fixed:JSON.stringify(pp.xfixed)});
+  const p=new URLSearchParams({lang:tagrollLang(),anchor:pp.cur.anchor,rating:$('#rating').value,act:(i===0&&ncur)?ncur.act:'',temp:tempFor('expr'),req:reqSet('expr'),on:JSON.stringify(onSet('expr')),cos:cosText(),charcap:$('#charcap').value,seed:pp.xseed,seg:segText(),exclude:ex,design:designTags(i),people:PN,fixed:JSON.stringify(pp.xfixed)});
   const d=await jget('../api/expr?'+p,'#xmeta','expr');pp.xcur=d||null}
  syncSel();if(xcur)xrender(xcur);else $('#xslots').innerHTML='';updateTop();proll(false)}
 function xsetFixed(slot,tag){
@@ -357,14 +372,14 @@ function xrender(d){
   const on=t=>Array.isArray(s.chosen)?s.chosen.includes(t):t===s.chosen;
   const chips=s.cands.map(c=>`<span class="chip ${on(c.tag)?'on':''}" data-tag="${c.tag}" onclick="xsetFixed('${s.slot}','${c.tag}')">${c.tag}<small>${(c.conf*100).toFixed(0)}% ×${c.lift}</small></span>`).join('');
   const empty=Array.isArray(s.chosen)?!s.chosen.length:!s.chosen;
-  const none=s.none_p!=null?`<span class="chip none ${empty?'on':''}" onclick="xsetFixed('${s.slot}','')">없음<small>${(s.none_p*100).toFixed(0)}%</small></span>`:'';
-  return `<div class="slot"><div class="lab">${s.label}<small>조건 ${s.cond&&s.cond.length?s.cond.length+'개':'표본만'} · ${s.n.toLocaleString()}장${s.k>1?' · 최대 '+s.k+'개 (칩을 눌러 더하거나 뺌)':''}</small></div><div>${chips}${none}</div></div>`}).join('');
- $('#xmeta').textContent=`시드 ${d.seed} · 온도 ${d.temp} · 표본 ${d.src} ${d.n_src.toLocaleString()}장 · 칩을 누르면 고정하고 뒤만 다시 굴립니다`}
+  const none=s.none_p!=null?`<span class="chip none ${empty?'on':''}" onclick="xsetFixed('${s.slot}','')">${T('없음')}<small>${(s.none_p*100).toFixed(0)}%</small></span>`:'';
+  return `<div class="slot"><div class="lab">${T(s.label)}<small>${condN(s,'조건 표본만')} · ${nImg(s.n)}${kTail(s)}</small></div><div>${chips}${none}</div></div>`}).join('');
+ $('#xmeta').textContent=T('시드 {seed} · 온도 {temp} · 표본 {src} {n}장 · 칩을 누르면 고정하고 뒤만 다시 굴립니다',{seed:d.seed,temp:d.temp,src:d.src,n:d.n_src.toLocaleString(LOC())})}
 async function sroll(newSeed){if(!P.length||!P[0].cur)return;   // 씬은 한 벌이고 인물 1 의 디자인을 조건으로 쓴다
- if(!$('#scene_on').checked){scur=null;$('#sslots').innerHTML='';$('#smeta').textContent='씬 모듈 꺼짐';updateTop();chainDone();return}
+ if(!$('#scene_on').checked){scur=null;$('#sslots').innerHTML='';$('#smeta').textContent=T('씬 모듈 꺼짐');updateTop();chainDone();return}
  if(newSeed){sseed=Math.floor(Math.random()*1e9);sfixed={}}
- const p=new URLSearchParams({anchor:P[0].cur.anchor,rating:$('#rating').value,act:ncur?ncur.act:'',temp:tempFor('scene'),req:reqSet('scene'),on:JSON.stringify(onSet('scene')),charcap:$('#charcap').value,seed:sseed,bg:$('#bg').value,nowhite:$('#nowhite').checked?'1':'0',seg:segText(),frame:$('#frame_sel').value,exclude:exclText(),design:designTags(0),people:PN,fixed:JSON.stringify(sfixed)});
- $('#smeta').textContent='굴리는 중…';
+ const p=new URLSearchParams({lang:tagrollLang(),anchor:P[0].cur.anchor,rating:$('#rating').value,act:ncur?ncur.act:'',temp:tempFor('scene'),req:reqSet('scene'),on:JSON.stringify(onSet('scene')),charcap:$('#charcap').value,seed:sseed,bg:$('#bg').value,nowhite:$('#nowhite').checked?'1':'0',seg:segText(),frame:$('#frame_sel').value,exclude:exclText(),design:designTags(0),people:PN,fixed:JSON.stringify(sfixed)});
+ $('#smeta').textContent=T('굴리는 중…');
  const d=await jget('../api/scene?'+p,'#smeta','scene');if(d){scur=d;srender(d)}else{scur=null;$('#sslots').innerHTML=''}updateTop();chainDone()}
 function ssetFixed(slot,tag){   // 배경 유형은 둘까지라 칩을 눌러 더하거나 뺀다 (표정의 볼·상태와 같은 방식, 2026-09-08)
  const s=scur&&scur.slots.find(x=>x.slot===slot);
@@ -372,30 +387,30 @@ function ssetFixed(slot,tag){   // 배경 유형은 둘까지라 칩을 눌러 �
  else sfixed[slot]=tag;
  sroll(false)}
 async function proll(newSeed){if(!P.length||!P[0].cur)return;
- if(!$('#pose_on').checked){P.forEach(pp=>pp.pcur=null);pcur=null;$('#pslots').innerHTML='';$('#pmeta').textContent='포즈 모듈 꺼짐';updateTop();sroll(false);return}
+ if(!$('#pose_on').checked){P.forEach(pp=>pp.pcur=null);pcur=null;$('#pslots').innerHTML='';$('#pmeta').textContent=T('포즈 모듈 꺼짐');updateTop();sroll(false);return}
  if(newSeed)P.forEach(pp=>{pp.pseed=Math.floor(Math.random()*1e9);pp.pfixed={}});
- $('#pmeta').textContent='굴리는 중…';
+ $('#pmeta').textContent=T('굴리는 중…');
  for(let i=0;i<PN;i++){const pp=P[i];
   const ex=[exclText(),(i===0&&ncur&&$('#nsfw_on').checked)?ncur.nsfw_tags.join(','):''].filter(Boolean).join(',');
-  const p=new URLSearchParams({anchor:pp.cur.anchor,rating:$('#rating').value,act:(i===0&&ncur)?ncur.act:'',temp:tempFor('pose'),req:reqSet('pose'),on:JSON.stringify(onSet('pose')),cos:cosText(),charcap:$('#charcap').value,seed:pp.pseed,seg:segText(),exclude:ex,design:designTags(i),people:PN,fixed:JSON.stringify(pp.pfixed)});
+  const p=new URLSearchParams({lang:tagrollLang(),anchor:pp.cur.anchor,rating:$('#rating').value,act:(i===0&&ncur)?ncur.act:'',temp:tempFor('pose'),req:reqSet('pose'),on:JSON.stringify(onSet('pose')),cos:cosText(),charcap:$('#charcap').value,seed:pp.pseed,seg:segText(),exclude:ex,design:designTags(i),people:PN,fixed:JSON.stringify(pp.pfixed)});
   const d=await jget('../api/pose?'+p,'#pmeta','pose');pp.pcur=d||null}
  syncSel();if(pcur)prender(pcur);else $('#pslots').innerHTML='';updateTop();sroll(false)}
 function psetFixed(slot,tag){pfixed[slot]=tag;proll(false)}
 function prender(d){
  $('#pslots').innerHTML=d.slots.map(s=>{
   const chips=s.cands.map(c=>`<span class="chip ${c.tag===s.chosen?'on':''}" data-tag="${c.tag}" onclick="psetFixed('${s.slot}','${c.tag}')">${c.tag}<small>${(c.conf*100).toFixed(0)}% ×${c.lift}</small></span>`).join('');
-  const none=s.none_p!=null?`<span class="chip none ${s.chosen?'':'on'}" onclick="psetFixed('${s.slot}','')">없음<small>${(s.none_p*100).toFixed(0)}%</small></span>`:'';
-  return `<div class="slot"><div class="lab">${s.label}<small>조건 ${s.cond&&s.cond.length?s.cond.length+'개':'표본만'} · ${s.n.toLocaleString()}장</small></div><div>${chips}${none}</div></div>`}).join('');
- $('#pmeta').textContent=`시드 ${d.seed} · 표본 ${d.src} ${d.n_src.toLocaleString()}장 · 칩을 누르면 고정하고 뒤만 다시 굴립니다`}
+  const none=s.none_p!=null?`<span class="chip none ${s.chosen?'':'on'}" onclick="psetFixed('${s.slot}','')">${T('없음')}<small>${(s.none_p*100).toFixed(0)}%</small></span>`:'';
+  return `<div class="slot"><div class="lab">${T(s.label)}<small>${condN(s,'조건 표본만')} · ${nImg(s.n)}</small></div><div>${chips}${none}</div></div>`}).join('');
+ $('#pmeta').textContent=T('시드 {seed} · 표본 {src} {n}장 · 칩을 누르면 고정하고 뒤만 다시 굴립니다',{seed:d.seed,src:d.src,n:d.n_src.toLocaleString(LOC())})}
 function srender(d){
  $('#sslots').innerHTML=d.slots.map(s=>{
-  if(s.skipped)return `<div class="slot"><div class="lab">${s.label}<small>${s.why}라 생략</small></div><div></div></div>`;
+  if(s.skipped)return `<div class="slot"><div class="lab">${T(s.label)}<small>${T('{why}라 생략',{why:T(s.why)})}</small></div><div></div></div>`;
   const on=t=>Array.isArray(s.chosen)?s.chosen.includes(t):t===s.chosen;
   const empty=Array.isArray(s.chosen)?!s.chosen.length:!s.chosen;
   const chips=s.cands.map(c=>`<span class="chip ${on(c.tag)?'on':''}" data-tag="${c.tag}" onclick="ssetFixed('${s.slot}','${c.tag}')">${c.tag}<small>${(c.conf*100).toFixed(0)}% ×${c.lift}</small></span>`).join('');
-  const none=s.none_p!=null?`<span class="chip none ${empty?'on':''}" onclick="ssetFixed('${s.slot}','')">없음<small>${(s.none_p*100).toFixed(0)}%</small></span>`:'';
-  return `<div class="slot"><div class="lab">${s.label}<small>조건 ${s.cond&&s.cond.length?s.cond.length+'개':'표본만'} · ${s.n.toLocaleString()}장${s.k>1?' · 최대 '+s.k+'개 (칩을 눌러 더하거나 뺌)':''}</small></div><div>${chips}${none}</div></div>`}).join('');
- $('#smeta').textContent=`시드 ${d.seed} · 표본 ${d.src} ${d.n_src.toLocaleString()}장 · 칩을 누르면 고정하고 뒤만 다시 굴립니다`}
+  const none=s.none_p!=null?`<span class="chip none ${empty?'on':''}" onclick="ssetFixed('${s.slot}','')">${T('없음')}<small>${(s.none_p*100).toFixed(0)}%</small></span>`:'';
+  return `<div class="slot"><div class="lab">${T(s.label)}<small>${condN(s,'조건 표본만')} · ${nImg(s.n)}${kTail(s)}</small></div><div>${chips}${none}</div></div>`}).join('');
+ $('#smeta').textContent=T('시드 {seed} · 표본 {src} {n}장 · 칩을 누르면 고정하고 뒤만 다시 굴립니다',{seed:d.seed,src:d.src,n:d.n_src.toLocaleString(LOC())})}
 function nsetFixed(slot,tag){
  if(slot==='act'){nfixed={act:tag};$('#lockact').checked=true}
  else if(tag===''){nfixed[slot]=[]}
@@ -407,62 +422,68 @@ function nrender(d){
   const on=t=>Array.isArray(s.chosen)?s.chosen.includes(t):t===s.chosen;
   const chips=s.cands.map(c=>`<span class="chip ${on(c.tag)?'on':''}" data-tag="${c.tag}" onclick="nsetFixed('${s.slot}','${c.tag.replace(/'/g,"\\'")}')">${c.tag}<small>${(c.conf*100).toFixed(0)}%${s.anchor?'':' ×'+c.lift}</small></span>`).join('');
   const empty=Array.isArray(s.chosen)?!s.chosen.length:!s.chosen;
-  const none=s.none_p!=null?`<span class="chip none ${empty?'on':''}" onclick="nsetFixed('${s.slot}','')">없음<small>${(s.none_p*100).toFixed(0)}%</small></span>`:'';
-  if(s.skipped)return `<div class="slot"><div class="lab">${s.label}<small>누드라 생략</small></div><div></div></div>`;
-  if(s.k===0)return `<div class="slot"><div class="lab">${s.label}<small>약에서는 안 뽑음</small></div><div style="color:#aaa;padding-top:6px">강도를 올리면 열립니다</div></div>`;
-  const sub=s.anchor?`e 등급 ${s.n.toLocaleString()}장`:`조건 ${s.cond&&s.cond.length?s.cond.length+'개':'행위만'} · ${s.n.toLocaleString()}장${s.k>1?' · 최대 '+s.k+'개 (칩을 눌러 더하거나 뺌)':''}`;
-  return `<div class="slot"><div class="lab">${s.label}<small>${sub}</small></div><div>${chips}${none}</div></div>`}).join('');
+  const none=s.none_p!=null?`<span class="chip none ${empty?'on':''}" onclick="nsetFixed('${s.slot}','')">${T('없음')}<small>${(s.none_p*100).toFixed(0)}%</small></span>`:'';
+  if(s.skipped)return `<div class="slot"><div class="lab">${T(s.label)}<small>${T('누드라 생략')}</small></div><div></div></div>`;
+  if(s.k===0)return `<div class="slot"><div class="lab">${T(s.label)}<small>${T('약에서는 안 뽑음')}</small></div><div style="color:#aaa;padding-top:6px">${T('강도를 올리면 열립니다')}</div></div>`;
+  const sub=s.anchor?T('e 등급 {n}장',{n:s.n.toLocaleString(LOC())}):`${condN(s,'조건 행위만')} · ${nImg(s.n)}${kTail(s)}`;
+  return `<div class="slot"><div class="lab">${T(s.label)}<small>${sub}</small></div><div>${chips}${none}</div></div>`}).join('');
  updateTop();
- $('#nmeta').textContent=`시드 ${d.seed} · 조건 가슴 ${d.body||'없음'} · 걷어 낸 부위 ${d.stripped.length?d.stripped.join(', '):'없음'} · 위 프롬프트 = 디자인(옷 걷어낸 뒤) + NSFW. 칩을 누르면 고정하고 뒤만 다시 굴립니다`}
+ $('#nmeta').textContent=T('시드 {seed} · 조건 가슴 {body} · 걷어 낸 부위 {stripped} · 위 프롬프트 = 디자인(옷 걷어낸 뒤) + NSFW. 칩을 누르면 고정하고 뒤만 다시 굴립니다',
+  {seed:d.seed,body:d.body||T('없음'),stripped:d.stripped.length?d.stripped.join(', '):T('없음')})}
 function render(d){
  $('#slots').innerHTML=d.slots.map(s=>{
-  if(s.anchor)return `<div class="slot"><div class="lab">${s.label}<small>앵커 · ${s.n.toLocaleString()}장</small></div><div><span class="chip anchor" data-tag="${s.chosen}">${s.chosen}</span></div></div>`;
-  if(s.skipped)return `<div class="slot"><div class="lab">${s.label}<small>${s.why||'원피스'}라 생략</small></div><div></div></div>`;
-  const extra=(s.chosen&&!s.cands.some(c=>c.tag===s.chosen))?`<span class="chip on" data-tag="${s.chosen}" onclick="setFixed('${s.slot}','${s.chosen}')">${s.chosen}<small>고정 (후보 밖)</small></span>`:'';
+  if(s.anchor)return `<div class="slot"><div class="lab">${T(s.label)}<small>${T('앵커 · {n}장',{n:s.n.toLocaleString(LOC())})}</small></div><div><span class="chip anchor" data-tag="${s.chosen}">${s.chosen}</span></div></div>`;
+  if(s.skipped)return `<div class="slot"><div class="lab">${T(s.label)}<small>${T('{why}라 생략',{why:T(s.why||'원피스')})}</small></div><div></div></div>`;
+  const extra=(s.chosen&&!s.cands.some(c=>c.tag===s.chosen))?`<span class="chip on" data-tag="${s.chosen}" onclick="setFixed('${s.slot}','${s.chosen}')">${s.chosen}<small>${T('고정 (후보 밖)')}</small></span>`:'';
   const chips=s.cands.map(c=>`<span class="chip ${c.tag===s.chosen?'on':''}" data-tag="${c.tag}" onclick="setFixed('${s.slot}','${c.tag}')">${c.tag}<small>${(c.conf*100).toFixed(0)}% ×${c.lift}</small></span>`).join('');
-  const none=s.none_p!=null?`<span class="chip none ${s.chosen?'':'on'}" onclick="setFixed('${s.slot}','')">없음<small>${(s.none_p*100).toFixed(0)}%</small></span>`:'';
-  const src=`질의 ${s.cond&&s.cond.length?s.cond.length+'개':'앵커만'} · 완전 일치 ${s.n.toLocaleString()}장`;
-  return `<div class="slot"><div class="lab">${s.label}<small>${src}</small></div><div>${extra}${chips}${none}</div></div>`}).join('');
- $('#meta').textContent=`시드 ${d.seed} · 온도 ${d.temp} · ${d.rating==='gs'?'전연령':'전 등급'}${d.anchor_random?` · 랜덤 앵커 「${d.anchor.replace(/_/g,' ')}」 (칸을 비워 두면 굴릴 때마다 새로 뽑습니다)`:''} · 앵커 그림 ${d.n_anchor.toLocaleString()}장${d.charcap?` (캐릭터당 ${d.charcap}장 상한 · 상한 전 ${d.n_raw.toLocaleString()}장)`:''}${(d.seg&&d.seg.length&&d.seg_n!=null)?(d.seg_fallback?` · 장르 안 앵커 그림 ${d.seg_n}장 (작아서 장르 전체·앵커 통계로 보정)`:` · 장르 안 ${d.seg_n.toLocaleString()}장`):''} · 칩을 누르면 그 부위를 고정하고 뒤 부위만 다시 굴립니다. 굴리기 = 새 시드`}
+  const none=s.none_p!=null?`<span class="chip none ${s.chosen?'':'on'}" onclick="setFixed('${s.slot}','')">${T('없음')}<small>${(s.none_p*100).toFixed(0)}%</small></span>`:'';
+  const src=`${(s.cond&&s.cond.length)?T('질의 {n}개',{n:s.cond.length}):T('질의 앵커만')} · ${T('완전 일치 {n}장',{n:s.n.toLocaleString(LOC())})}`;
+  return `<div class="slot"><div class="lab">${T(s.label)}<small>${src}</small></div><div>${extra}${chips}${none}</div></div>`}).join('');
+ $('#meta').textContent=T('시드 {seed} · 온도 {temp} · {rating}',{seed:d.seed,temp:d.temp,rating:d.rating==='gs'?T('전연령'):T('전 등급')})
+  +(d.anchor_random?T(' · 랜덤 앵커 「{tag}」 (칸을 비워 두면 굴릴 때마다 새로 뽑습니다)',{tag:d.anchor.replace(/_/g,' ')}):'')
+  +T(' · 앵커 그림 {n}장',{n:d.n_anchor.toLocaleString(LOC())})
+  +(d.charcap?T(' (캐릭터당 {cap}장 상한 · 상한 전 {raw}장)',{cap:d.charcap,raw:d.n_raw.toLocaleString(LOC())}):'')
+  +((d.seg&&d.seg.length&&d.seg_n!=null)?(d.seg_fallback?T(' · 장르 안 앵커 그림 {n}장 (작아서 장르 전체·앵커 통계로 보정)',{n:d.seg_n}):T(' · 장르 안 {n}장',{n:d.seg_n.toLocaleString(LOC())})):'')
+  +T(' · 칩을 누르면 그 부위를 고정하고 뒤 부위만 다시 굴립니다. 굴리기 = 새 시드')}
 // ── 색인 안내 (이식하면서 새로 붙인 것, 2026-09-10) ─────────────────────────
 // 색인 약 960MB 은 앱에 담기지 않고 릴리즈에서 받는다. 준비되기 전에는 굴리기 화면을 감추고 이 안내만 보인다.
 // ★진행률은 백엔드가 주는 `have`(다 받은 파일 + 받다 만 조각) 하나로 그린다 — 세는 곳이 둘이면 어긋난다.
-const MB=n=>(n/1e6).toLocaleString('ko-KR',{maximumFractionDigits:0})+'MB';
+const MB=n=>(n/1e6).toLocaleString(LOC(),{maximumFractionDigits:0})+'MB';
 let IDX=null, ROLLED=false, POLL=null;
-async function idxGet(url,opt){try{const r=await fetch(url,opt);return await r.json()}catch(e){return {error:'요청 실패: '+e.message}}}
+async function idxGet(url,opt){try{const r=await fetch(url+(url.indexOf('?')<0?'?':'&')+'lang='+tagrollLang(),opt);return await r.json()}catch(e){return {error:T('요청 실패 ({e})',{e:e.message})}}}
 function paintIdx(s){
  IDX=s;
- $('#g_size').textContent='약 '+MB(s.total||0);
- $('#g_dir').textContent=s.dir?('받는 자리: '+s.dir):'';
+ $('#g_size').textContent=T('약 {size}',{size:MB(s.total||0)});
+ $('#g_dir').textContent=s.dir?T('받는 자리: {dir}',{dir:s.dir}):'';
  const pct=s.total?Math.min(100,(s.have||0)/s.total*100):0;
  $('#g_fill').style.width=pct.toFixed(1)+'%';
  if(s.ready){
   $('#gate').classList.remove('show');$('#work').classList.add('show');
-  $('#f_state').textContent='색인 '+(s.version||'')+' · '+MB(s.total||0)+(s.loaded?' · 열림':'');
+  $('#f_state').textContent=T('색인 {ver} · {size}',{ver:s.version||'',size:MB(s.total||0)})+(s.loaded?T(' · 열림'):'');
   if(!ROLLED){ROLLED=true;loadSlots()}
   return true}
  $('#gate').classList.add('show');$('#work').classList.remove('show');
  const dl=s.downloading;
  $('#g_go').hidden=!!dl; $('#g_stop').hidden=!dl;
- $('#g_state').textContent=s.error?('멈췄습니다 — '+s.error)
-  :dl?`받는 중 ${MB(s.have||0)} / ${MB(s.total||0)} (${pct.toFixed(0)}%) · ${dl.name} · ${MB(dl.bps||0)}/s`
-  :s.cancelled?`멈췄습니다 — 받은 데까지 두었습니다 (${MB(s.have||0)} / ${MB(s.total||0)}). 다시 누르면 이어 받습니다.`
-  :(s.have?`받다 만 것이 있습니다 (${MB(s.have)} / ${MB(s.total||0)}). 이어 받습니다.`:`파일 ${(s.missing||[]).length}개를 받습니다.`);
- $('#f_state').textContent='색인 없음 — '+MB(s.have||0)+' / '+MB(s.total||0);
+ $('#g_state').textContent=s.error?T('멈췄습니다 — {e}',{e:SE(s.error)})
+  :dl?T('받는 중 {have} / {total} ({pct}%) · {name} · {bps}/s',{have:MB(s.have||0),total:MB(s.total||0),pct:pct.toFixed(0),name:dl.name,bps:MB(dl.bps||0)})
+  :s.cancelled?T('멈췄습니다 — 받은 데까지 두었습니다 ({have} / {total}). 다시 누르면 이어 받습니다.',{have:MB(s.have||0),total:MB(s.total||0)})
+  :(s.have?T('받다 만 것이 있습니다 ({have} / {total}). 이어 받습니다.',{have:MB(s.have),total:MB(s.total||0)}):T('파일 {n}개를 받습니다.',{n:(s.missing||[]).length}));
+ $('#f_state').textContent=T('색인 없음 — {have} / {total}',{have:MB(s.have||0),total:MB(s.total||0)});
  return false}
-async function idxTick(){const s=await idxGet('../api/index');if(!s||s.error&&!s.dir){$('#g_state').textContent=s.error||'상태를 못 읽었습니다';return}
+async function idxTick(){const s=await idxGet('../api/index');if(!s||s.error&&!s.dir){$('#g_state').textContent=s?SE(s.error)||T('상태를 못 읽었습니다'):T('상태를 못 읽었습니다');return}
  const ready=paintIdx(s);
  const busy=!!(s.downloading);
  clearTimeout(POLL);
  if(!ready||busy)POLL=setTimeout(idxTick,busy?700:3000)}
-$('#g_go').onclick=async()=>{$('#g_go').hidden=true;$('#g_state').textContent='시작합니다…';await idxGet('../api/index/download',{method:'POST'});idxTick()};
+$('#g_go').onclick=async()=>{$('#g_go').hidden=true;$('#g_state').textContent=T('시작합니다…');await idxGet('../api/index/download',{method:'POST'});idxTick()};
 $('#g_stop').onclick=async()=>{await idxGet('../api/index/cancel',{method:'POST'});idxTick()};
 $('#f_manage').onclick=async()=>{
  if(!IDX)return;
  if(!IDX.ready){$('#gate').scrollIntoView({behavior:'smooth'});return}
- if(!confirm(`색인을 지웁니다 (${MB(IDX.total||0)}).\n\n${IDX.dir}\n\n다시 쓰려면 또 받아야 합니다.`))return;
+ if(!confirm(T('색인을 지웁니다 ({size}).\n\n{dir}\n\n다시 쓰려면 또 받아야 합니다.',{size:MB(IDX.total||0),dir:IDX.dir})))return;
  const r=await idxGet('../api/index',{method:'DELETE'});
- if(r&&r.error)alert(r.error); else {ROLLED=false;location.reload()}};
+ if(r&&r.error)alert(SE(r.error)); else {ROLLED=false;location.reload()}};
 idxTick();
 
 // 접었다 편 상태는 기억한다 (사용자 지시 2026-09-11 「고르기 패널을 접고펼 수 있게」) —
@@ -484,21 +505,26 @@ const PUT_PREFIX='굴리기_';
 const PUT={b_design:['char','디자인'],b_expr:['char','표정'],b_pose:['char','포즈'],b_nsfw:['char','NSFW'],b_scene:['style','씬']};
 const MY_SCENE_LABEL=PUT_PREFIX+'씬';
 const MY_CHAR_LABELS=['디자인','표정','포즈','NSFW'].map(x=>PUT_PREFIX+x);
-/** 지금 씬 그룹의 스타일 카드 블록과 캐릭터 카드 — `get_workspace` 한 번으로 받는다 (블록마다 id 가 온다) */
+/** 지금 씬의 스타일 카드 블록과 캐릭터 카드 (블록마다 id 가 온다).
+ *  ★★`peropix.scene()` 은 화면에 **살아 있는** 상태다. `action('get_workspace')` 는 **저장된 파일**을 읽어
+ *    방금 손댄 것을 모르므로, 지울 대상을 놓친다 (게스트 실측 2026-09-11: 심어 둔 블록이 안 지워졌다).
+ *    옛 앱에는 `scene()` 이 없으니 그때만 `get_workspace` 로 떨어진다. */
 async function sceneState(){
+ if(peropix.scene){const s=await peropix.scene().catch(()=>null);
+  if(s)return {base:s.base||[],chars:s.chars||[]}}
  const w=await peropix.action('get_workspace').catch(()=>null);
  const gs=(w&&w.sceneGroups)||[];
  const g=gs.find(x=>x&&x.id===(w&&w.activeSceneGroup))||gs[0]||null;
  const pr=(g&&g.prompt)||{};
  return {base:pr.base||[],chars:pr.characters||[]}}
 /** i번째 인물이 들어갈 카드 — 지금 씬의 카드를 순서대로 쓰고, 모자라면 「인물 N」 이라는 이름으로 새로 생긴다 */
-function charAt(i,st){const c=st&&st.chars&&st.chars[i];return (c&&c.id)||('인물 '+(i+1))}
+function charAt(i,st){const c=st&&st.chars&&st.chars[i];return (c&&c.id)||T('인물 {n}',{n:i+1})}
 async function putBlock(kind,target,label,tags,mode,blockId){
  const name=kind==='style'?'edit_style_card':'edit_character';
  const args={label:label,tags:tags,mode:mode||'replace',block:blockId||''};
  if(kind==='char')args.character=target;
  const r=await peropix.call({call:'action',name:name,args:args});
- if(!r.ok)return r.error||'앱이 거절했습니다';
+ if(!r.ok)return r.error||T('앱이 거절했습니다');
  if(r.result&&r.result.error)return r.result.error.message||JSON.stringify(r.result.error);
  return ''}
 /** 내가 넣었던 블록을 **접두어로 전부** 걷어낸다 — 이번에 안 뽑힌 모듈의 지난 블록이 남지 않게.
@@ -519,14 +545,14 @@ async function sendOne(id,btn){
  const t=bundleText(id);if(!t)return;
  const [kind,label]=PUT[id]||(id.startsWith('b_p')?['char','디자인']:['style','씬']);
  const i=id.startsWith('b_p')?Number(id.slice(3)):0;
- btn.disabled=true;const old=btn.textContent;btn.textContent='넣는 중…';
+ btn.disabled=true;const old=btn.textContent;btn.textContent=T('넣는 중…');
  const st=await sceneState();
  const err=await putBlock(kind,kind==='char'?charAt(i,st):'',PUT_PREFIX+label,t);
- btn.textContent=err?'실패':'넣었음';
- if(err)peropix.toast('앱이 거절했습니다: '+err);
+ btn.textContent=err?T('실패'):T('넣었음');
+ if(err)peropix.toast(T('앱이 거절했습니다: {e}',{e:err}));
  setTimeout(()=>{btn.textContent=old;btn.disabled=false},1200)}
 async function sendAll(btn){
- btn.disabled=true;const old=btn.textContent;btn.textContent='넣는 중…';
+ btn.disabled=true;const old=btn.textContent;btn.textContent=T('넣는 중…');
  const st=await sceneState();
  await clearMine(st);   // ★먼저 내 블록을 전부 지운다 — 이번에 안 뽑힌 모듈의 지난 블록이 남지 않게
  // ★넣는 것은 **갈아 끼우기**다 (`replace` = 있으면 갈고 없으면 붙인다). `get_workspace` 는 **저장된 파일**을 읽어
@@ -537,8 +563,8 @@ async function sendAll(btn){
  else for(const id of ['b_design','b_expr','b_pose','b_nsfw']){const t=bundleText(id);
   if(t)bad=bad||await putBlock('char',charAt(0,st),PUT_PREFIX+PUT[id][1],t)}
  const sc=bundleText('b_scene'); if(sc)bad=bad||await putBlock('style','',MY_SCENE_LABEL,sc);
- btn.textContent=bad?'실패':'넣었음';
- if(bad)peropix.toast('앱이 거절했습니다: '+bad); else peropix.toast('굴린 태그를 지금 씬에 넣었습니다');
+ btn.textContent=bad?T('실패'):T('넣었음');
+ if(bad)peropix.toast(T('앱이 거절했습니다: {e}',{e:bad})); else peropix.toast(T('굴린 태그를 지금 씬에 넣었습니다'));
  setTimeout(()=>{btn.textContent=old;btn.disabled=false},1200)}
 // 굴리기 사슬(디자인 → NSFW → 표정 → 포즈 → 씬)이 끝나기를 기다리는 자리 — 씬 모듈이 끝에서 알린다
 let chainWait=null;
@@ -546,11 +572,27 @@ function chainDone(){if(chainWait){const f=chainWait;chainWait=null;f()}}
 function whenChainDone(ms){return new Promise(res=>{chainWait=res;setTimeout(()=>{if(chainWait===res){chainWait=null;res()}},ms||60000)})}
 /** 굴리고 나서 바로 넣는다 (사용자 지시 2026-09-11) */
 async function rollAndPut(btn){
- btn.disabled=true;const old=btn.textContent;btn.textContent='굴리는 중…';
+ btn.disabled=true;const old=btn.textContent;btn.textContent=T('굴리는 중…');
  const done=whenChainDone();
  await roll(true);
  await done;
- btn.textContent='넣는 중…';
+ btn.textContent=T('넣는 중…');
  await sendAll(btn);
  btn.textContent=old;btn.disabled=false}
+
+// ── 앱 언어를 따라간다 (사용자 결정 2026-09-11 「공식 플러그인은 세 언어를 기본으로」) ──────────
+// 정적 문구는 `data-t` 표식이 달린 자리를 사전이 갈아 끼우고, 굴린 결과처럼 JS 가 그린 것은 여기서 다시 그린다.
+function relabel(){
+ applyStaticI18n();
+ if(SL){renderPanel();
+  const g=document.querySelector('#tdet .tgrid');if(g){g.dataset.on='';g.innerHTML='';fillTemps()}
+  buildTop();updateTop()}
+ if(cur)render(cur); if(ncur)nrender(ncur); if(xcur)xrender(xcur); if(pcur)prender(pcur); if(scur)srender(scur);
+ renderTabs();
+ if(IDX)paintIdx(IDX)}
+(async()=>{
+ let l='ko';
+ try{l=await peropix.locale()}catch(e){l=(navigator.language||'ko').slice(0,2)}
+ setTagrollLang(l);relabel();
+ if(peropix.onLocale)peropix.onLocale(x=>{setTagrollLang(x);relabel()})})();
 </script></body></html>

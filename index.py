@@ -20,6 +20,11 @@ import os
 import time
 from pathlib import Path
 
+try:
+    from .msgs import M
+except ImportError:                      # 점검 스크립트는 이 폴더를 그냥 모듈로 읽는다 (패키지가 아니다)
+    from msgs import M
+
 HERE = Path(__file__).parent
 DATA_FOLDER = "_data"   # 앱 규격 — 업데이트해도 남는 자리 (`backend/plugins.py` 의 `DATA_FOLDER` 와 같아야 한다)
 MANIFEST = json.loads((HERE / "index-manifest.json").read_text(encoding="utf-8"))
@@ -115,9 +120,10 @@ async def _fetch(client, url: str, dest: Path, f: dict) -> None:
             part.unlink(missing_ok=True)
         elif r.status_code == 404:
             # ★릴리즈에 자산이 없을 때 오는 것이다 — 판이 아직 안 올라갔거나 매니페스트의 릴리즈 이름이 다르다
-            raise DownloadError(f"색인을 릴리즈에서 찾지 못했습니다 (HTTP 404). 색인 판 「{MANIFEST.get('release') or '?'}」 이 아직 올라가 있지 않을 수 있습니다:\n{url}")
+            raise DownloadError(M("색인을 릴리즈에서 찾지 못했습니다 (HTTP 404). 색인 판 「{rel}」 이 아직 올라가 있지 않을 수 있습니다:\n{url}",
+                                  rel=MANIFEST.get("release") or "?", url=url))
         elif r.status_code not in (200, 206):
-            raise DownloadError(f"{dest.name} 를 받지 못했습니다 (HTTP {r.status_code})")
+            raise DownloadError(M("{name} 를 받지 못했습니다 (HTTP {code})", name=dest.name, code=r.status_code))
         with part.open("ab" if start else "wb") as fh:
             async for chunk in r.aiter_bytes(1 << 20):
                 if _cancel:
@@ -126,10 +132,11 @@ async def _fetch(client, url: str, dest: Path, f: dict) -> None:
                 h.update(chunk)
                 _prog["done"] = int(_prog.get("done") or 0) + len(chunk)
     if part.stat().st_size != f["size"]:
-        raise DownloadError(f"{dest.name} 의 크기가 다릅니다 ({part.stat().st_size:,} ≠ {f['size']:,})")
+        raise DownloadError(M("{name} 의 크기가 다릅니다 ({got} ≠ {want})",
+                              name=dest.name, got=f"{part.stat().st_size:,}", want=f"{f['size']:,}"))
     if h.hexdigest() != f["sha256"]:
         part.unlink(missing_ok=True)
-        raise DownloadError(f"{dest.name} 의 sha256 이 다릅니다 (받은 파일을 버렸습니다)")
+        raise DownloadError(M("{name} 의 sha256 이 다릅니다 (받은 파일을 버렸습니다)", name=dest.name))
     dest.unlink(missing_ok=True)
     part.rename(dest)
 
@@ -147,7 +154,7 @@ async def _run() -> None:
         d.mkdir(parents=True, exist_ok=True)
         base = _base_url()
         if not base:
-            raise DownloadError("색인을 받을 주소가 매니페스트에 없습니다")
+            raise DownloadError(M("색인을 받을 주소가 매니페스트에 없습니다"))
         miss = missing(d)
         _prog["total"] = sum(f["size"] for f in miss)
         async with httpx.AsyncClient(timeout=httpx.Timeout(30.0, read=300.0), follow_redirects=True) as c:
@@ -204,7 +211,7 @@ def remove() -> dict:
                 kept.append(f"{q.name} ({e.strerror or e})")
     if kept:
         return {"ok": False, "removed": gone, "kept": kept,
-                "error": "쓰고 있는 파일이 있어 일부를 못 지웠습니다. 앱을 다시 켠 뒤에 지우십시오."}
+                "error": M("쓰고 있는 파일이 있어 일부를 못 지웠습니다. 앱을 다시 켠 뒤에 지우십시오.")}
     return {"ok": True, "removed": gone}
 
 
@@ -225,5 +232,5 @@ async def engine():
     if _engine is not None:
         return _engine
     if missing():
-        raise FileNotFoundError("색인이 아직 없습니다")
+        raise FileNotFoundError(M("색인이 아직 없습니다"))
     return await asyncio.to_thread(_import_engine)
