@@ -62,6 +62,10 @@ header #seedbox input{width:84px}
 .chip.on small{color:var(--accent-ink)}
 .meta{color:var(--ink-dim);font-size:var(--text-2xs);margin-top:6px}
 
+/* 접었다 펴는 카드 — 「옵션」·「굴릴 부위 고르기」 (접힘은 기억한다, 아래 JS) */
+#pickbox > summary, #optbox > summary{cursor:pointer;font-weight:var(--w-semi);color:var(--ink-soft)}
+#pickbox[open] > summary, #optbox[open] > summary{margin-bottom:8px}
+
 /* 굴릴 부위 고르기 (신체도) */
 #bodymap .mod{border-top:1px solid var(--line-soft);padding:7px 0 5px}
 #bodymap .mod:first-child{border-top:0;padding-top:0}
@@ -146,7 +150,10 @@ main h3 .note{font-weight:var(--w-norm);font-size:var(--text-2xs);color:var(--in
   <select id="frame_sel" onchange="sroll(false)" title="구도 슬롯의 켜기·끄기는 아래 「씬」 패널의 프레이밍에서 합니다. 여기서는 자동으로 뽑을지 특정 구도로 고정할지만 정합니다"><option value="auto">구도 자동</option><!--FRAMES--></select>
 </div>
 </details>
- <div id="bodymap"></div>
+ <details class="card" id="pickbox" open>
+  <summary>굴릴 부위 고르기</summary>
+  <div id="bodymap"></div>
+ </details>
  <div id="top"></div>
  <div id="ptabs"></div>
  <div id="slots"></div>
@@ -456,6 +463,13 @@ $('#f_manage').onclick=async()=>{
  const r=await idxGet('../api/index',{method:'DELETE'});
  if(r&&r.error)alert(r.error); else {ROLLED=false;location.reload()}};
 idxTick();
+
+// 접었다 편 상태는 기억한다 (사용자 지시 2026-09-11 「고르기 패널을 접고펼 수 있게」) —
+// 창을 닫았다 열어도 그대로다. 접어 두면 굴린 결과가 바로 위에 온다.
+for (const id of ['pickbox','optbox']){
+ const el=$('#'+id); if(!el)continue;
+ try{const v=localStorage.getItem('tagroll_open_'+id); if(v!==null)el.open=(v==='1')}catch(e){}
+ el.addEventListener('toggle',()=>{try{localStorage.setItem('tagroll_open_'+id,el.open?'1':'0')}catch(e){}})}
 
 // ── 앱에 넣기 (이식하면서 새로 붙인 것, 2026-09-10) ──────────────────────────
 // 묶음 줄마다 「넣기」. 인물 것(디자인·표정·포즈·NSFW)은 **캐릭터 카드**로, 씬은 **스타일 카드**로 간다 —
