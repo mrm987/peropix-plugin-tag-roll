@@ -1,7 +1,7 @@
 {
   "id": "tag-roll",
   "name": "태그 굴리기",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "태그 하나에서 출발해 부위별로 디자인·표정·포즈·씬을 danbooru 통계에서 뽑는다. 처음 열 때 색인(약 960MB)을 내려받는다.",
   "homepage": "https://github.com/mrm987/peropix-plugin-tag-roll",
   "server": "server.py",

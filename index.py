@@ -136,17 +136,20 @@ async def _fetch(client, url: str, dest: Path, f: dict) -> None:
 
 async def _run() -> None:
     global _cancel
-    import httpx
-
-    d = dirpath()
-    d.mkdir(parents=True, exist_ok=True)
-    base = _base_url()
-    if not base:
-        _prog["error"] = "색인을 받을 주소가 매니페스트에 없습니다"
-        return
-    miss = missing(d)
-    _prog.update({"done": 0, "total": sum(f["size"] for f in miss), "started": time.time(), "error": "", "cancelled": False})
+    # ★★**무엇이 나든 화면에 남긴다** (실측 2026-09-11): 예전에는 폴더 만들기·주소 셈이 try 밖에 있어,
+    #   거기서 난 예외가 작업과 함께 조용히 사라졌다 — 사용자는 「색인 내려받기」를 눌렀는데 **아무 일도 안 일어난다.**
+    #   (게스트에서 `_data` 가 끊긴 정션이라 mkdir 이 FileExistsError 를 냈다.)
+    _prog.update({"done": 0, "total": 0, "started": time.time(), "error": "", "cancelled": False, "name": ""})
     try:
+        import httpx
+
+        d = dirpath()
+        d.mkdir(parents=True, exist_ok=True)
+        base = _base_url()
+        if not base:
+            raise DownloadError("색인을 받을 주소가 매니페스트에 없습니다")
+        miss = missing(d)
+        _prog["total"] = sum(f["size"] for f in miss)
         async with httpx.AsyncClient(timeout=httpx.Timeout(30.0, read=300.0), follow_redirects=True) as c:
             for f in miss:
                 _prog["name"] = f["name"]
