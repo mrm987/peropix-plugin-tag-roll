@@ -113,6 +113,7 @@ main h3 .note{font-weight:var(--w-norm);font-size:var(--text-2xs);color:var(--in
   <div class="tgrid"><!--MODTEMPS--></div></details>
  <label><select id="rating"><option value="all">전 등급</option><option value="gs">전연령만</option></select></label>
  <button onclick="roll(true)">굴리기</button>
+ <button class="primary" onclick="rollAndPut(this)" title="굴린 뒤 결과를 바로 지금 씬에 넣습니다 (내가 넣었던 블록은 먼저 지웁니다)">굴리기+넣기</button>
  <label>시드 <input id="seed" type="text" style="width:90px;font-size:13px;padding:4px"></label>
 </header>
 <main>
@@ -360,11 +361,11 @@ function xrender(d){
   return `<div class="slot"><div class="lab">${s.label}<small>조건 ${s.cond&&s.cond.length?s.cond.length+'개':'표본만'} · ${s.n.toLocaleString()}장${s.k>1?' · 최대 '+s.k+'개 (칩을 눌러 더하거나 뺌)':''}</small></div><div>${chips}${none}</div></div>`}).join('');
  $('#xmeta').textContent=`시드 ${d.seed} · 온도 ${d.temp} · 표본 ${d.src} ${d.n_src.toLocaleString()}장 · 칩을 누르면 고정하고 뒤만 다시 굴립니다`}
 async function sroll(newSeed){if(!P.length||!P[0].cur)return;   // 씬은 한 벌이고 인물 1 의 디자인을 조건으로 쓴다
- if(!$('#scene_on').checked){scur=null;$('#sslots').innerHTML='';$('#smeta').textContent='씬 모듈 꺼짐';updateTop();return}
+ if(!$('#scene_on').checked){scur=null;$('#sslots').innerHTML='';$('#smeta').textContent='씬 모듈 꺼짐';updateTop();chainDone();return}
  if(newSeed){sseed=Math.floor(Math.random()*1e9);sfixed={}}
  const p=new URLSearchParams({anchor:P[0].cur.anchor,rating:$('#rating').value,act:ncur?ncur.act:'',temp:tempFor('scene'),req:reqSet('scene'),on:JSON.stringify(onSet('scene')),charcap:$('#charcap').value,seed:sseed,bg:$('#bg').value,nowhite:$('#nowhite').checked?'1':'0',seg:segText(),frame:$('#frame_sel').value,exclude:exclText(),design:designTags(0),people:PN,fixed:JSON.stringify(sfixed)});
  $('#smeta').textContent='굴리는 중…';
- const d=await jget('../api/scene?'+p,'#smeta','scene');if(d){scur=d;srender(d)}else{scur=null;$('#sslots').innerHTML=''}updateTop()}
+ const d=await jget('../api/scene?'+p,'#smeta','scene');if(d){scur=d;srender(d)}else{scur=null;$('#sslots').innerHTML=''}updateTop();chainDone()}
 function ssetFixed(slot,tag){   // 배경 유형은 둘까지라 칩을 눌러 더하거나 뺀다 (표정의 볼·상태와 같은 방식, 2026-09-08)
  const s=scur&&scur.slots.find(x=>x.slot===slot);
  if(s&&s.k>1){if(tag===''){sfixed[slot]=[]}else{const now=Array.isArray(s.chosen)?s.chosen:[];let arr=Array.isArray(sfixed[slot])?sfixed[slot].slice():now.slice();arr=arr.includes(tag)?arr.filter(x=>x!==tag):arr.concat(tag).slice(0,2);sfixed[slot]=arr}}
@@ -476,39 +477,80 @@ for (const id of ['pickbox','optbox']){
 // 앱의 구분이 그렇다 (`edit_character` = 그 인물의 몸·의상·표정·포즈 · `edit_style_card` = 그림 전체에 걸리는 것).
 // ★같은 이름의 블록이 있으면 갈아 끼우고 없으면 붙인다 (카메라 플러그인과 같은 처방).
 // ★인물 자리는 지금 씬에 있는 캐릭터 카드를 **순서대로** 쓴다. 모자라면 「인물 N」 이라는 이름으로 새로 생긴다.
+// ★★블록 이름에는 **접두어**를 붙인다 (사용자 지시 2026-09-11): 사용자가 손으로 만든 블록과 겹치지 않게,
+// 그리고 「지금 씬에 넣기」가 **내 블록만** 골라 지울 수 있게. 지우고 나서 넣으므로 지난번 것이 섞이지 않는다
+// (전에는 이번에 안 뽑힌 모듈의 옛 블록이 그대로 남았다).
+const PUT_PREFIX='굴리기_';
 const PUT={b_design:['char','디자인'],b_expr:['char','표정'],b_pose:['char','포즈'],b_nsfw:['char','NSFW'],b_scene:['style','씬']};
-async function charAt(i){
+const MY_SCENE_LABEL=PUT_PREFIX+'씬';
+const MY_CHAR_LABELS=['디자인','표정','포즈','NSFW'].map(x=>PUT_PREFIX+x);
+/** 지금 씬 그룹의 스타일 카드 블록과 캐릭터 카드 — `get_workspace` 한 번으로 받는다 (블록마다 id 가 온다) */
+async function sceneState(){
  const w=await peropix.action('get_workspace').catch(()=>null);
- const cs=(w&&(w.characters||(w.result&&w.result.characters)))||[];
- return cs[i]&&cs[i].id?cs[i].id:('인물 '+(i+1))}
-async function putBlock(kind,target,label,tags){
+ const gs=(w&&w.sceneGroups)||[];
+ const g=gs.find(x=>x&&x.id===(w&&w.activeSceneGroup))||gs[0]||null;
+ const pr=(g&&g.prompt)||{};
+ return {base:pr.base||[],chars:pr.characters||[]}}
+/** i번째 인물이 들어갈 카드 — 지금 씬의 카드를 순서대로 쓰고, 모자라면 「인물 N」 이라는 이름으로 새로 생긴다 */
+function charAt(i,st){const c=st&&st.chars&&st.chars[i];return (c&&c.id)||('인물 '+(i+1))}
+async function putBlock(kind,target,label,tags,mode,blockId){
  const name=kind==='style'?'edit_style_card':'edit_character';
- const args={label,tags,mode:'replace',block:''};
+ const args={label:label,tags:tags,mode:mode||'replace',block:blockId||''};
  if(kind==='char')args.character=target;
- let r=await peropix.call({call:'action',name,args});
- if(!r.ok||(r.result&&r.result.error)){const a2={...args};delete a2.block;a2.mode='add';r=await peropix.call({call:'action',name,args:a2})}
+ const r=await peropix.call({call:'action',name:name,args:args});
  if(!r.ok)return r.error||'앱이 거절했습니다';
  if(r.result&&r.result.error)return r.result.error.message||JSON.stringify(r.result.error);
  return ''}
+/** 내가 넣었던 블록을 **접두어로 전부** 걷어낸다 — 이번에 안 뽑힌 모듈의 지난 블록이 남지 않게.
+ *  ★블록 id 로 지운다 (이름이 겹쳐도 정확하다). 사용자가 손으로 만든 블록은 접두어가 없으니 건드리지 않는다. */
+async function clearMine(st){
+ const s0=st||await sceneState();
+ for(const b of s0.base)if(String(b&&b.label||'').indexOf(PUT_PREFIX)===0)await putBlock('style','',b.label,'','remove',b.id);
+ for(const c of s0.chars)for(const b of (c.prompt||[]))if(String(b&&b.label||'').indexOf(PUT_PREFIX)===0)
+  await putBlock('char',c.id,b.label,'','remove',b.id);
+ // ★스냅샷이 늦어도 내가 쓰는 **고정 이름표**는 반드시 지운다 (이름으로 한 번 더). `get_workspace` 는 저장된 파일을
+ //   읽으므로 방금 들어간 블록을 아직 모를 수 있는데, 그때 위의 훑기가 통째로 헛돈다 (실측 2026-09-11).
+ //   없는 블록을 지우라고 하면 앱이 그냥 넘긴다 — 카드는 스냅샷에 있는 것만 건드려 새 카드가 생기지 않게 한다.
+ for(const c of (s0.chars||[]))for(const L of MY_CHAR_LABELS)await putBlock('char',c.id,L,'','remove');
+ await putBlock('style','',MY_SCENE_LABEL,'','remove')}
 function bundleText(id){const el=$('#'+id);if(!el)return '';const raw=el.textContent;
  return (el.classList.contains('empty')||raw==='(전부 없음)')?'':raw}
 async function sendOne(id,btn){
  const t=bundleText(id);if(!t)return;
- const [kind,label]=PUT[id]||(id.startsWith('b_p')?['char','디자인']:['style','굴리기']);
+ const [kind,label]=PUT[id]||(id.startsWith('b_p')?['char','디자인']:['style','씬']);
  const i=id.startsWith('b_p')?Number(id.slice(3)):0;
  btn.disabled=true;const old=btn.textContent;btn.textContent='넣는 중…';
- const err=await putBlock(kind,kind==='char'?await charAt(i):'',label,t);
+ const st=await sceneState();
+ const err=await putBlock(kind,kind==='char'?charAt(i,st):'',PUT_PREFIX+label,t);
  btn.textContent=err?'실패':'넣었음';
  if(err)peropix.toast('앱이 거절했습니다: '+err);
  setTimeout(()=>{btn.textContent=old;btn.disabled=false},1200)}
 async function sendAll(btn){
  btn.disabled=true;const old=btn.textContent;btn.textContent='넣는 중…';
+ const st=await sceneState();
+ await clearMine(st);   // ★먼저 내 블록을 전부 지운다 — 이번에 안 뽑힌 모듈의 지난 블록이 남지 않게
+ // ★넣는 것은 **갈아 끼우기**다 (`replace` = 있으면 갈고 없으면 붙인다). `get_workspace` 는 **저장된 파일**을 읽어
+ //   방금 넣은 블록을 모를 수 있는데(저장이 잠깐 뒤에 된다), 그때도 같은 이름이 둘이 되지 않는다 (실측 2026-09-11).
  let bad='';
- if(PN>1){for(let i=0;i<PN;i++){const t=bundleText('b_p'+i);if(t)bad=bad||await putBlock('char',await charAt(i),'디자인',t)}}
+ if(PN>1){for(let i=0;i<PN;i++){const t=bundleText('b_p'+i);
+  if(t)bad=bad||await putBlock('char',charAt(i,st),PUT_PREFIX+'디자인',t)}}
  else for(const id of ['b_design','b_expr','b_pose','b_nsfw']){const t=bundleText(id);
-  if(t)bad=bad||await putBlock('char',await charAt(0),PUT[id][1],t)}
- const sc=bundleText('b_scene'); if(sc)bad=bad||await putBlock('style','','씬',sc);
+  if(t)bad=bad||await putBlock('char',charAt(0,st),PUT_PREFIX+PUT[id][1],t)}
+ const sc=bundleText('b_scene'); if(sc)bad=bad||await putBlock('style','',MY_SCENE_LABEL,sc);
  btn.textContent=bad?'실패':'넣었음';
  if(bad)peropix.toast('앱이 거절했습니다: '+bad); else peropix.toast('굴린 태그를 지금 씬에 넣었습니다');
  setTimeout(()=>{btn.textContent=old;btn.disabled=false},1200)}
+// 굴리기 사슬(디자인 → NSFW → 표정 → 포즈 → 씬)이 끝나기를 기다리는 자리 — 씬 모듈이 끝에서 알린다
+let chainWait=null;
+function chainDone(){if(chainWait){const f=chainWait;chainWait=null;f()}}
+function whenChainDone(ms){return new Promise(res=>{chainWait=res;setTimeout(()=>{if(chainWait===res){chainWait=null;res()}},ms||60000)})}
+/** 굴리고 나서 바로 넣는다 (사용자 지시 2026-09-11) */
+async function rollAndPut(btn){
+ btn.disabled=true;const old=btn.textContent;btn.textContent='굴리는 중…';
+ const done=whenChainDone();
+ await roll(true);
+ await done;
+ btn.textContent='넣는 중…';
+ await sendAll(btn);
+ btn.textContent=old;btn.disabled=false}
 </script></body></html>
