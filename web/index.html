@@ -96,6 +96,16 @@ header #seedbox input{width:84px}
 main h3{display:flex;gap:10px;align-items:center;margin:14px 0 0}
 main h3 .note{font-weight:var(--w-norm);font-size:var(--text-2xs);color:var(--ink-dim)}
 
+/* 접히는 모듈 (사용자 지시 2026-09-11 「결과 아래의 각 모듈 섹션을 접을 수 있게」) — 제목 줄이 곧 손잡이다 */
+details.mod{margin-top:28px}
+details.mod > summary{display:flex;gap:12px;align-items:center;cursor:pointer;list-style:none;
+  font-size:var(--text-lg);font-weight:var(--w-bold);color:var(--ink)}
+details.mod > summary::-webkit-details-marker{display:none}
+details.mod > summary::before{content:'▾';font-size:var(--text-xs);color:var(--ink-faint);width:10px;flex:0 0 auto}
+details.mod:not([open]) > summary::before{content:'▸'}
+details.mod > summary .note{font-weight:var(--w-norm);font-size:var(--text-2xs);color:var(--ink-dim)}
+details.mod:not([open]) > summary .note{display:none}
+
 /* 색인 안내 (색인이 없거나 받는 중일 때만 보인다) */
 #gate{display:none}
 #gate.show{display:block}
@@ -160,26 +170,26 @@ main h3 .note{font-weight:var(--w-norm);font-size:var(--text-2xs);color:var(--in
  <div id="ptabs"></div>
  <div id="slots"></div>
  <div class="meta" id="meta"></div>
- <h3 style="margin-top:28px;display:flex;gap:12px;align-items:center"><span data-t="NSFW 모듈">NSFW 모듈</span> <button onclick="nroll(true)" style="font-size:14px;padding:6px 14px;border:0;border-radius:6px;background:#c0392b;color:#fff;cursor:pointer" data-t="체위만 다시">체위만 다시</button>
-
-  <span style="font-size:13px;font-weight:400;color:#777" data-t="위 굴리기가 디자인과 함께 굴린다 · e 등급 여성 그림 표본 · 가슴 크기를 조건으로 씀 · 옷 상태에 따라 디자인의 옷을 걷어 냄">위 굴리기가 디자인과 함께 굴린다 · e 등급 여성 그림 표본 · 가슴 크기를 조건으로 씀 · 옷 상태에 따라 디자인의 옷을 걷어 냄</span></h3>
- <div id="nslots"></div>
- <div class="meta" id="nmeta"></div>
- <h3 style="margin-top:28px;display:flex;gap:12px;align-items:center"><span data-t="표정 모듈">표정 모듈</span> <button onclick="xroll(true)" style="font-size:14px;padding:6px 14px;border:0;border-radius:6px;background:#b5651d;color:#fff;cursor:pointer" data-t="표정만 다시">표정만 다시</button>
-
-  <span style="font-size:13px;font-weight:400;color:#777" data-t="감정 → 입 → 눈 → 눈썹 → 볼·상태(둘까지) → 시선 · 표본은 포즈·씬과 같음 · 후보 컷 없음 · NSFW 가 고른 태그는 뺌">감정 → 입 → 눈 → 눈썹 → 볼·상태(둘까지) → 시선 · 표본은 포즈·씬과 같음 · 후보 컷 없음 · NSFW 가 고른 태그는 뺌</span></h3>
- <div id="xslots"></div>
- <div class="meta" id="xmeta"></div>
- <h3 style="margin-top:28px;display:flex;gap:12px;align-items:center"><span data-t="포즈 모듈">포즈 모듈</span> <button onclick="proll(true)" style="font-size:14px;padding:6px 14px;border:0;border-radius:6px;background:#7b5ea7;color:#fff;cursor:pointer" data-t="포즈만 다시">포즈만 다시</button>
-
-  <span style="font-size:13px;font-weight:400;color:#777" data-t="자세 → 팔 → 손짓 → 다리 → 몸통 → 소지 · 표본은 씬과 같음 · NSFW 가 고른 태그는 뺌">자세 → 팔 → 손짓 → 다리 → 몸통 → 소지 · 표본은 씬과 같음 · NSFW 가 고른 태그는 뺌</span></h3>
- <div id="pslots"></div>
- <div class="meta" id="pmeta"></div>
- <h3 style="margin-top:28px;display:flex;gap:12px;align-items:center"><span data-t="씬 모듈">씬 모듈</span> <button onclick="sroll(true)" style="font-size:14px;padding:6px 14px;border:0;border-radius:6px;background:#2c7a7b;color:#fff;cursor:pointer" data-t="씬만 다시">씬만 다시</button>
-
-  <span style="font-size:13px;font-weight:400;color:#777" data-t="장소 → 시간 → 조명 → 효과 → 프레이밍 → 각도 · NSFW 가 있으면 체위의 e 등급 표본, 없으면 디자인 앵커의 표본">장소 → 시간 → 조명 → 효과 → 프레이밍 → 각도 · NSFW 가 있으면 체위의 e 등급 표본, 없으면 디자인 앵커의 표본</span></h3>
- <div id="sslots"></div>
- <div class="meta" id="smeta"></div>
+ <details class="mod" id="mod_nsfw" open>
+  <summary><span data-t="NSFW 모듈">NSFW 모듈</span> <button onclick="event.preventDefault();nroll(true)" style="font-size:14px;padding:6px 14px;border:0;border-radius:6px;background:#c0392b;color:#fff;cursor:pointer" data-t="체위만 다시">체위만 다시</button><span class="note" data-t="위 굴리기가 디자인과 함께 굴린다 · e 등급 여성 그림 표본 · 가슴 크기를 조건으로 씀 · 옷 상태에 따라 디자인의 옷을 걷어 냄">위 굴리기가 디자인과 함께 굴린다 · e 등급 여성 그림 표본 · 가슴 크기를 조건으로 씀 · 옷 상태에 따라 디자인의 옷을 걷어 냄</span></summary>
+  <div id="nslots"></div>
+  <div class="meta" id="nmeta"></div>
+ </details>
+ <details class="mod" id="mod_expr" open>
+  <summary><span data-t="표정 모듈">표정 모듈</span> <button onclick="event.preventDefault();xroll(true)" style="font-size:14px;padding:6px 14px;border:0;border-radius:6px;background:#b5651d;color:#fff;cursor:pointer" data-t="표정만 다시">표정만 다시</button><span class="note" data-t="감정 → 입 → 눈 → 눈썹 → 볼·상태(둘까지) → 시선 · 표본은 포즈·씬과 같음 · 후보 컷 없음 · NSFW 가 고른 태그는 뺌">감정 → 입 → 눈 → 눈썹 → 볼·상태(둘까지) → 시선 · 표본은 포즈·씬과 같음 · 후보 컷 없음 · NSFW 가 고른 태그는 뺌</span></summary>
+  <div id="xslots"></div>
+  <div class="meta" id="xmeta"></div>
+ </details>
+ <details class="mod" id="mod_pose" open>
+  <summary><span data-t="포즈 모듈">포즈 모듈</span> <button onclick="event.preventDefault();proll(true)" style="font-size:14px;padding:6px 14px;border:0;border-radius:6px;background:#7b5ea7;color:#fff;cursor:pointer" data-t="포즈만 다시">포즈만 다시</button><span class="note" data-t="자세 → 팔 → 손짓 → 다리 → 몸통 → 소지 · 표본은 씬과 같음 · NSFW 가 고른 태그는 뺌">자세 → 팔 → 손짓 → 다리 → 몸통 → 소지 · 표본은 씬과 같음 · NSFW 가 고른 태그는 뺌</span></summary>
+  <div id="pslots"></div>
+  <div class="meta" id="pmeta"></div>
+ </details>
+ <details class="mod" id="mod_scene" open>
+  <summary><span data-t="씬 모듈">씬 모듈</span> <button onclick="event.preventDefault();sroll(true)" style="font-size:14px;padding:6px 14px;border:0;border-radius:6px;background:#2c7a7b;color:#fff;cursor:pointer" data-t="씬만 다시">씬만 다시</button><span class="note" data-t="장소 → 시간 → 조명 → 효과 → 프레이밍 → 각도 · NSFW 가 있으면 체위의 e 등급 표본, 없으면 디자인 앵커의 표본">장소 → 시간 → 조명 → 효과 → 프레이밍 → 각도 · NSFW 가 있으면 체위의 e 등급 표본, 없으면 디자인 앵커의 표본</span></summary>
+  <div id="sslots"></div>
+  <div class="meta" id="smeta"></div>
+ </details>
 </div>
 </main>
 <footer>
@@ -488,7 +498,7 @@ idxTick();
 
 // 접었다 편 상태는 기억한다 (사용자 지시 2026-09-11 「고르기 패널을 접고펼 수 있게」) —
 // 창을 닫았다 열어도 그대로다. 접어 두면 굴린 결과가 바로 위에 온다.
-for (const id of ['pickbox','optbox']){
+for (const id of ['pickbox','optbox','mod_nsfw','mod_expr','mod_pose','mod_scene']){
  const el=$('#'+id); if(!el)continue;
  try{const v=localStorage.getItem('tagroll_open_'+id); if(v!==null)el.open=(v==='1')}catch(e){}
  el.addEventListener('toggle',()=>{try{localStorage.setItem('tagroll_open_'+id,el.open?'1':'0')}catch(e){}})}
