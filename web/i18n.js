@@ -12,8 +12,8 @@
   "use strict";
 
   var EN = {
-    "랜덤 생성 버튼 추가": "Add a Random generate button",
-    "켜면 생성 화면에 「랜덤 생성」 버튼이 생깁니다. 누르면 지금 조건으로 굴려 넣고 바로 생성합니다": "Adds a Random generate button to the generate screen. It rolls with the current settings, inserts the result and starts generating.",
+    "생성 버튼 아래에 랜덤 생성 버튼 추가": "Add a Random generate button below Generate",
+    "누르면 지금 조건으로 굴려 넣고 바로 생성합니다": "Rolls with the current settings, inserts the result and starts generating.",
     // 화면 골격 (2026-09-12: 두 칸으로 다시 세우며 생긴 것들)
     "굴리기 조건": "Roll settings",
     "신체": "Body", "복장": "Outfit", "신체·복장": "Body & outfit",
@@ -216,8 +216,8 @@
   };
 
   var JA = {
-    "랜덤 생성 버튼 추가": "ランダム生成ボタンを追加",
-    "켜면 생성 화면에 「랜덤 생성」 버튼이 생깁니다. 누르면 지금 조건으로 굴려 넣고 바로 생성합니다": "生成画面に「ランダム生成」ボタンを置きます。今の条件でロールして入れ、そのまま生成します。",
+    "생성 버튼 아래에 랜덤 생성 버튼 추가": "生成ボタンの下にランダム生成ボタンを追加",
+    "누르면 지금 조건으로 굴려 넣고 바로 생성합니다": "今の条件でロールして入れ、そのまま生成します。",
     // 画面の骨格
     "굴리기 조건": "ロール設定",
     "신체": "身体", "복장": "服装", "신체·복장": "身体・服装",

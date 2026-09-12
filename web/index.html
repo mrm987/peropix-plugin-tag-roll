@@ -392,8 +392,8 @@ function buildTop(){
  $('#top').innerHTML=head+bundleRow('b_nsfw','NSFW','nsfw','nroll(true)')+bundleRow('b_scene',T('씬'),'scene','sroll(true)')
   // ★★「전체 = 신체·복장 + …」 같은 **조합식을 걷었다** (사용자 지시 2026-09-13) — 무엇이 합쳐지는지는
   //   바로 위 결과 줄이 이미 보여 준다. 그 자리에는 이 화면 바깥으로 나가는 **옵션**을 둔다.
-  +`<div class="all"><label class="meta" data-t-title="${T('켜면 생성 화면에 「랜덤 생성」 버튼이 생깁니다. 누르면 지금 조건으로 굴려 넣고 바로 생성합니다')}">`
-  +`<input type="checkbox" id="quickgen" onchange="saveQuick()"> ${T('랜덤 생성 버튼 추가')}</label>`
+  +`<div class="all"><label class="meta" data-t-title="${T('누르면 지금 조건으로 굴려 넣고 바로 생성합니다')}">`
+  +`<input type="checkbox" id="quickgen" onchange="saveQuick()"> ${T('생성 버튼 아래에 랜덤 생성 버튼 추가')}</label>`
   +`<span class="spacer"></span><button onclick="copyAll(this)">${T('복사')}</button><button class="primary" id="btnPut" onclick="sendAll(this)">${T('지금 씬에 넣기')}</button></div>`;
  paintSw()}
 // ★buildTop() 을 여기서 바로 부르면 안 된다 — $ 가 아래에서 const 로 선언돼 있어 TDZ 오류가 나고, 그러면 스크립트 평가가 통째로 멈춰 화면이 죽는다 (2026-09-08 실측).
