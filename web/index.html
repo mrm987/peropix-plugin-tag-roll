@@ -267,8 +267,13 @@ function renderPanel(){if(!SL)return;
    +SL.genres.map(g=>tri2('genre',g.key,g.label)).join('')+`</div></div>`;
  h+=`<div class="grp"><div class="gh"><b>${T('복식')}</b><span class="cnt">${SL.costumes.filter(c=>stOf('cos',c.key)).length} / ${SL.costumes.length}</span></div><div class="chips">`
    +SL.costumes.map(c=>tri2('cos',c.key,c.label)).join('')+`</div></div>`;
+ // ★착의 고르개(#mode)는 이 패널 안으로 옮겨 붙인 것이라, innerHTML 을 갈아 끼우면 함께 지워진다.
+ //  지워지면 이 함수도 roll() 도 #mode.value 를 읽다 예외를 내고 멈춘다 (2026-09-12 실측: 복장을 끄면
+ //  스위치 표시도, 다시 굴리기도 통째로 안 돌았다). 갈아 끼우기 전에 떼어 두었다가 도로 붙인다 —
+ //  h 를 다 만든 뒤에 떼어야 한다. 만드는 도중 onCount() → groupOff() 가 이 값을 읽기 때문이다.
+ const mode=$('#mode');if(mode)mode.remove();
  $('#bodymap').innerHTML=h;
- const seat=$('#wearmode');if(seat)seat.appendChild($('#mode'));}
+ const seat=$('#wearmode');if(seat&&mode)seat.appendChild(mode);}
 // 장르·복식은 2단이다 (꺼짐 ☐ / 켜짐 ☑) — 슬롯과 달리 「반드시」가 없다. 개수 제한 없이 OR 로 풀을 넓힌다.
 function tri2(m,k,label){return `<span class="tri ${stOf(m,k)?'s1':''}" onclick="cycle2('${m}','${k}')" title="${T('눌러서 켜고 끕니다')}">${T(label)}</span>`}
 function cycle2(m,k){ST[skey(m,k)]=stOf(m,k)?0:1;renderPanel();renderMods();roll(false)}
@@ -298,22 +303,49 @@ async function loadSlots(){const r=await fetch('../api/slots?lang='+tagrollLang(
 function setBundle(id,text,empty){const el=$('#'+id);if(!el)return;
  const none=text===''; const t=none?T('(전부 없음)'):(text||empty);
  el.textContent=t;el.classList.toggle('empty',!text)}
-/** 결과 한 줄 — [스위치] 이름 | 태그 | 다시.  `mod` 를 주면 그 모듈을 켜고 끄는 스위치가 선다 */
-const bundleRow=(id,label,mod)=>`<div class="bundle">`
- +(mod?`<span class="sw" id="sw_${mod}" onclick="toggleMod('${mod}')"><i></i></span>`:`<span class="sw hide"><i></i></span>`)
+/** 결과 한 줄 — [스위치] 이름 | 태그 | 다시.
+ *  `sw` 는 켜고 끄는 이름(모듈 또는 body·wear), `again` 은 그 줄만 새 시드로 다시 굴리는 함수다. */
+const swOn=(k)=>(k==='body'||k==='wear')?groupOn(k):!!($('#'+k+'_on')||{}).checked;
+const bundleRow=(id,label,sw,again)=>`<div class="bundle">`
+ // ★켜짐은 **그리는 그 자리에서** 읽는다 — 그린 뒤 따로 칠하면 다시 그려질 때마다 어긋난다
+ +(sw?`<span class="sw${swOn(sw)?' on':''}" id="sw_${sw}" onclick="toggleSw('${sw}')"><i></i></span>`:`<span class="sw hide"><i></i></span>`)
  +`<span class="k">${label}</span><span class="v empty" id="${id}">${T('굴리면 여기에 뜹니다')}</span>`
- +`<span class="btns"><button onclick="sendOne('${id}',this)">${T('다시')}</button></span></div>`;
-/** 모듈 켜고 끄기 — 창구는 이 스위치 하나다 (숨겨 둔 체크박스가 값을 들고 있다) */
-function toggleMod(m){const c=$('#'+m+'_on');if(!c)return;c.checked=!c.checked;
- c.dispatchEvent(new Event('change'));updateTop()}
-function paintSw(){['nsfw','expr','pose','scene'].forEach(m=>{const el=$('#sw_'+m),c=$('#'+m+'_on');
- if(el&&c)el.classList.toggle('on',c.checked)})}
+ +`<span class="btns">${again?`<button onclick="${again}">${T('다시')}</button>`:''}</span></div>`;
+/** 켜고 끄기 — 창구는 이 스위치 하나다 (모듈은 숨겨 둔 체크박스가, 신체·복장은 슬롯 상태가 값을 들고 있다) */
+function toggleSw(k){
+ if(k==='body'||k==='wear')return toggleGroup(k);
+ const c=$('#'+k+'_on');if(!c)return;c.checked=!c.checked;c.dispatchEvent(new Event('change'));updateTop()}
+/** 신체·복장을 통째로 끄고 켠다 — 끄기 전 상태를 기억해 두었다가 그대로 되돌린다 */
+let SAVED={};
+function groupKeys(g){return ((g==='body'?SL.body_zones:SL.wear_zones)||[]).flatMap(([,k])=>k)}
+function groupOn(g){return SL?groupKeys(g).some(k=>stOf('design',k)>0):false}
+function toggleGroup(g){
+ if(!SL)return;const keys=groupKeys(g);
+ if(groupOn(g)){SAVED[g]={};keys.forEach(k=>{SAVED[g][k]=stOf('design',k);ST[skey('design',k)]=0})}
+ else keys.forEach(k=>{ST[skey('design',k)]=(SAVED[g]&&SAVED[g][k])||1});
+ renderPanel();renderMods();paintSw();
+ // ★굴리기가 끝난 뒤 한 번 더 — 그 사이 결과 줄이 다시 그려지므로 마지막 상태로 맞춘다
+ roll(false).then(paintSw)}
+function paintSw(){
+ ['nsfw','expr','pose','scene'].forEach(m=>{const el=$('#sw_'+m),c=$('#'+m+'_on');
+  if(el&&c)el.classList.toggle('on',c.checked)});
+ ['body','wear'].forEach(g=>{const el=$('#sw_'+g);if(el)el.classList.toggle('on',groupOn(g))})}
+/** 한 갈래만 다시 — 다른 갈래를 이번 한 번만 고정하고 새 시드로 굴린다 (사용자 지시 2026-09-12) */
+let ONCE=null;
+async function rollPart(part){
+ if(!cur||!SL)return;
+ const wear=new Set(SL.wearable||[]);ONCE={};
+ // ★「없음」으로 뽑힌 슬롯도 빈 문자열로 묶는다 — 안 묶으면 새 시드에서 값이 생겨 다른 갈래가 움직인다
+ cur.slots.forEach(s=>{if(s.anchor||s.skipped)return;
+  if(wear.has(s.slot)===(part==='body'))ONCE[s.slot]=s.chosen||''});
+ try{await roll(true)}finally{ONCE=null}}
 // 묶음 줄: 인원 1 이면 모듈별(디자인·표정·포즈), 2 이상이면 인물별(디자인+표정+포즈를 한 덩어리로 — 사용자 지시 2026-09-08 「캐릭터 단위로 뽑은건 인물별로 묶어줄것」)
 function buildTop(){
- const head=PN>1?Array.from({length:PN},(_,i)=>bundleRow('b_p'+i,T('인물 {n}',{n:i+1}))).join('')
-                :bundleRow('b_body',T('신체'))+bundleRow('b_wear',T('복장'))
-                 +bundleRow('b_expr',T('표정'),'expr')+bundleRow('b_pose',T('포즈'),'pose');
- $('#top').innerHTML=head+bundleRow('b_nsfw','NSFW','nsfw')+bundleRow('b_scene',T('씬'),'scene')
+ const head=PN>1?Array.from({length:PN},(_,i)=>bundleRow('b_p'+i,T('인물 {n}',{n:i+1}),'',`rollOnly(${i})`)).join('')
+                :bundleRow('b_body',T('신체'),'body',"rollPart('body')")
+                 +bundleRow('b_wear',T('복장'),'wear',"rollPart('wear')")
+                 +bundleRow('b_expr',T('표정'),'expr','xroll(true)')+bundleRow('b_pose',T('포즈'),'pose','proll(true)');
+ $('#top').innerHTML=head+bundleRow('b_nsfw','NSFW','nsfw','nroll(true)')+bundleRow('b_scene',T('씬'),'scene','sroll(true)')
   +`<div class="all"><span class="meta" id="b_note"></span><button onclick="copyAll(this)">${T('복사')}</button><button class="primary" id="btnPut" onclick="sendAll(this)">${T('지금 씬에 넣기')}</button></div>`;
  paintSw()}
 // ★buildTop() 을 여기서 바로 부르면 안 된다 — $ 가 아래에서 const 로 선언돼 있어 TDZ 오류가 나고, 그러면 스크립트 평가가 통째로 멈춰 화면이 죽는다 (2026-09-08 실측).
@@ -376,7 +408,7 @@ function keepAct(){if($('#lockact').checked){const a=(ncur&&ncur.act)||nfixed.ac
 // 인물 i 의 디자인 하나. 시드는 기준 시드에서 인물마다 갈라 쓴다 (같은 기준 시드면 인물 1 은 늘 같다)
 async function rollOne(i){
  const tag=$('#tag').value.trim(), pp=P[i];
- const p=new URLSearchParams({lang:tagrollLang(),anchor:tag,temp:tempFor('design'),cos:cosText(),charcap:$('#charcap').value,req:reqSet('design'),rating:$('#rating').value,seg:segText(),seed:pp.seed,mode:$('#mode').value,on:JSON.stringify(onSet('design')),kemono:$('#nokemono').checked?'0':'1',focus:$('#focus').checked?'1':'0',exclude:exclText(),people:PN,fixed:JSON.stringify(pp.fixed)});
+ const p=new URLSearchParams({lang:tagrollLang(),anchor:tag,temp:tempFor('design'),cos:cosText(),charcap:$('#charcap').value,req:reqSet('design'),rating:$('#rating').value,seg:segText(),seed:pp.seed,mode:$('#mode').value,on:JSON.stringify(onSet('design')),kemono:$('#nokemono').checked?'0':'1',focus:$('#focus').checked?'1':'0',exclude:exclText(),people:PN,fixed:JSON.stringify(Object.assign({},pp.fixed,ONCE||{}))});
  const d=await jget('../api/roll?'+p,'#meta','design');
  if(!d){return false}
  pp.cur=d;pp.xcur=null;pp.pcur=null;return true}
@@ -393,6 +425,9 @@ async function roll(newSeed){
  ncur=null;scur=null;syncSel();
  renderTabs();render(cur);$('#nslots').innerHTML='';$('#xslots').innerHTML='';$('#pslots').innerHTML='';$('#sslots').innerHTML='';updateTop();nroll(false)}
 function setFixed(slot,tag){fixed[slot]=tag;roll(false)}
+/** 인물 하나만 다시 — 그 사람의 신체·복장·표정·포즈를 새 시드로 */
+async function rollOnly(i){const old=sel;selPerson(i);
+ P[i].seed=0;await rollOne(i);await xroll(true);await proll(true);updateTop();selPerson(old)}
 function designTags(i){const c=(P[i===undefined?sel:i]||{}).cur;return c?c.slots.filter(s=>s.chosen&&!s.anchor).map(s=>s.chosen).join(','):''}   // 디자인이 고른 태그(앵커 제외) — 표정·포즈·씬 질의에 앞세운다 (2026-09-08)
 let nfixed={}, nseed=0, ncur=null;
 async function nroll(newSeed){if(!P.length||!P[0].cur)return;   // NSFW 는 한 벌이고 인물 1 을 대상으로 한다
@@ -498,8 +533,8 @@ function modCount(m){if(m==='design')return '';
 function buildMods(){
  if(!SL||$('#modbody').dataset.on)return;
  $('#modbody').dataset.on='1';
+ // ★「다시」는 위 결과 줄에만 둔다 (사용자 지시 2026-09-12) — 같은 일을 두 곳에서 시키지 않는다
  $('#modbody').innerHTML=MODS.map(m=>`<div class="card" id="mc_${m.k}" hidden><div class="mhead"><b>${T(m.t)}</b>`
-  +(m.again?`<button onclick="${m.again}(true)">${T('다시')}</button>`:'')
   +`<span class="chips" id="mt_${m.k}" style="margin-left:auto"></span></div>`
   +`<div class="mbody"><div id="${m.slots}"></div><div class="meta" id="${m.meta}"></div></div></div>`).join('')}
 function renderMods(){

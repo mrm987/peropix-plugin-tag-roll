@@ -194,6 +194,36 @@ def slot_of(tag):
         if in_slot(tag, s): return s
     return None
 
+
+# ★★**필수 포함 태그가 제 모듈로 간다** (사용자 지시 2026-09-12: *"적절한 모듈을 찾아서 넣어줘. 못 찾으면 신체에"*).
+#   전에는 디자인 슬롯에 안 맞는 앵커가 전부 「추가 태그」 한 줄로 빠져 신체 쪽에 붙었다 — `smile` 을 넣으면
+#   표정 표본만 좁아지고 정작 표정 결과에는 안 들어갔다 (후보에서도 빠진다).
+#   각 모듈의 슬롯 풀에서 찾아 그 자리에 **앵커로 박는다.** 못 찾으면 지금까지처럼 「추가 태그」다.
+def _pool_of(row):
+    """모듈 슬롯 한 줄에서 후보 풀을 꺼낸다 (표마다 칸 수가 달라 마지막 칸으로 잡는다)"""
+    return row[-1]
+
+
+def module_slot_of(tag, slots):
+    """`tag` 가 이 모듈의 어느 슬롯에 드는가 — 없으면 None"""
+    for row in slots:
+        if tag in _pool_of(row): return row[0]
+    return None
+
+
+def anchors_in(anchors, slots):
+    """앵커 중 이 모듈이 가져갈 것 → {슬롯: 태그}. 한 슬롯에는 하나만 (먼저 적은 것)"""
+    out = {}
+    for a in anchors:
+        k = module_slot_of(a, slots)
+        if k and k not in out: out[k] = a
+    return out
+
+
+def owned_anywhere(tag):
+    """디자인 밖의 어느 모듈이든 이 태그를 가져가는가"""
+    return any(module_slot_of(tag, sl) for sl in (XSLOTS, PSLOTS, SSLOTS, NSLOTS))
+
 con = duckdb.connect()
 if not ROLL_DB.exists():
     if not Path(LONG).exists(): need_dump(ROLL_DB.name)
@@ -903,7 +933,8 @@ def roll(anchor, temp, rating, fixed, seed, mode="dressed", seg="all", on=None, 
     for a in anchors:
         sl = slot_of(a)
         if sl: by_slot.setdefault(sl, []).append(a)
-        else: extra.append(a)
+        elif owned_anywhere(a): pass          # 표정·포즈·씬·NSFW 가 제 슬롯에 박는다
+        else: extra.append(a)                 # 아무 데도 안 맞으면 여기 (신체 쪽에 붙는다)
     out = []; picked = []; none_slots = []     # picked: 질의에 쓰는 태그(앵커 제외, 고른 순서). none_slots: 「없음」으로 결정된 믿을 만한 슬롯
     # ★원피스 배타 규칙을 걷어냈다 (사용자 지시 2026-09-08 「통계에 맡겨」). 전에는 원피스를 뽑으면 상의·하의를 통째로 건너뛰었는데,
     # 실측은 그렇지 않다 — 개 귀 표본(태그 30개 이상 5,547장)에서 원피스 그림의 30.0% 가 상의를, 31.1% 가 하의를 함께 단다
@@ -1052,8 +1083,13 @@ def roll_scene(anchor, rating, act, temp, fixed, seed, bg="auto", seg="all", fra
         # 「장르가 복식보다 더 배경에 영향을 줘야함」). 그래서 배경·장소·조명은 장르만 걸린 표본에서 뽑는다.
         sub, n0 = sub_table(anchors, rating, seed, seg, charcap); base, N = base_for(rating); src = " + ".join(anchors)
         prior_sub = wide_sample(seg, rating, seed, charcap) if small(sub) else None
+    _anc = set(anchor.split(",")) if isinstance(anchor, str) else set(anchor or ())
+    mine = anchors_in(sorted(_anc), SSLOTS)            # 필수 포함 태그 중 씬 것
     out = []; picked = []
     for key, label, required, pool in SSLOTS:
+        if key in mine:
+            out.append({"slot": key, "label": label, "chosen": mine[key], "anchor": True, "cands": [], "n": n0})
+            picked.append(mine[key]); continue
         if on is not None and key not in on:
             out.append({"slot": key, "label": label, "chosen": None, "skipped": True, "why": "꺼짐", "n": 0, "cond": [], "none_p": None, "cands": []}); continue
         if key == "frame":
@@ -1159,8 +1195,12 @@ def roll_pose(anchor, rating, act, temp, fixed, seed, seg="all", exclude=(), cha
         prior_sub = wide_sample(seg, rating, seed, charcap, cos) if small(sub) else None
     anchor_set = set(anchor.split(",")) if isinstance(anchor, str) else set(anchor)
     excl = anchor_set | set(exclude) | ({act} if act else set())
+    mine = anchors_in(sorted(anchor_set), PSLOTS)      # 필수 포함 태그 중 포즈 것
     out = []; picked = []
     for key, label, required, pool in PSLOTS:
+        if key in mine:
+            out.append({"slot": key, "label": label, "chosen": mine[key], "anchor": True, "cands": [], "n": n0})
+            picked.append(mine[key]); continue
         if on is not None and key not in on:
             out.append({"slot": key, "label": label, "chosen": None, "skipped": True, "why": "꺼짐", "n": 0, "cond": [], "none_p": None, "cands": []}); continue
         poolset = {t for t in pool if t in TID and TID[t] <= TID_CUT and t not in excl}
@@ -1199,9 +1239,13 @@ def roll_expr(anchor, rating, act, temp, fixed, seed, seg="all", exclude=(), cha
         prior_sub = wide_sample(seg, rating, seed, charcap, cos) if small(sub) else None
     anchor_set = set(anchor.split(",")) if isinstance(anchor, str) else set(anchor)
     excl = anchor_set | set(exclude) | ({act} if act else set())
+    mine = anchors_in(sorted(anchor_set), XSLOTS)      # 필수 포함 태그 중 표정 것
     out = []; picked = []
     design = [t for t in design if t in TID]
     for key, label, required, k, pool in XSLOTS:
+        if key in mine:
+            out.append({"slot": key, "label": label, "chosen": mine[key], "anchor": True, "cands": [], "n": n0})
+            picked.append(mine[key]); continue
         if on is not None and key not in on:
             out.append({"slot": key, "label": label, "chosen": None, "skipped": True, "why": "꺼짐", "n": 0, "cond": [], "none_p": None, "cands": []}); continue
         poolset = {t for t in pool if t in TID and TID[t] <= TID_CUT and t not in excl}
