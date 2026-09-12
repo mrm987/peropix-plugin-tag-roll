@@ -187,7 +187,6 @@ header #seedbox input{width:84px}
     <span class="spacer"></span>
     <button class="primary" id="btnRoll" onclick="roll(true)" data-t="굴리기">굴리기</button>
     <button id="btnRollPut" onclick="rollAndPut(this)" data-t-title="굴린 뒤 결과를 바로 지금 씬에 넣습니다 (내가 넣었던 블록은 먼저 지웁니다)" data-t="굴리기+넣기">굴리기+넣기</button>
-    <label data-t-title="켜면 생성 화면에 「랜덤 생성」 단추가 생깁니다. 누르면 지금 조건으로 굴려 넣고 바로 생성합니다 (앱을 다시 켜면 반영됩니다)"><input type="checkbox" id="quickgen" onchange="saveQuick()"> <span data-t="생성 화면에 단추">생성 화면에 단추</span></label>
    </div>
    <div class="res">
     <h3 data-t="이번에 굴린 프롬프트">이번에 굴린 프롬프트</h3>
@@ -391,7 +390,11 @@ function buildTop(){
                  +bundleRow('b_wear',T('복장'),'wear',"rollPart('wear')")
                  +bundleRow('b_expr',T('표정'),'expr','xroll(true)')+bundleRow('b_pose',T('포즈'),'pose','proll(true)');
  $('#top').innerHTML=head+bundleRow('b_nsfw','NSFW','nsfw','nroll(true)')+bundleRow('b_scene',T('씬'),'scene','sroll(true)')
-  +`<div class="all"><span class="meta" id="b_note"></span><button onclick="copyAll(this)">${T('복사')}</button><button class="primary" id="btnPut" onclick="sendAll(this)">${T('지금 씬에 넣기')}</button></div>`;
+  // ★★「전체 = 신체·복장 + …」 같은 **조합식을 걷었다** (사용자 지시 2026-09-13) — 무엇이 합쳐지는지는
+  //   바로 위 결과 줄이 이미 보여 준다. 그 자리에는 이 화면 바깥으로 나가는 **옵션**을 둔다.
+  +`<div class="all"><label class="meta" data-t-title="${T('켜면 생성 화면에 「랜덤 생성」 버튼이 생깁니다. 누르면 지금 조건으로 굴려 넣고 바로 생성합니다')}">`
+  +`<input type="checkbox" id="quickgen" onchange="saveQuick()"> ${T('랜덤 생성 버튼 추가')}</label>`
+  +`<span class="spacer"></span><button onclick="copyAll(this)">${T('복사')}</button><button class="primary" id="btnPut" onclick="sendAll(this)">${T('지금 씬에 넣기')}</button></div>`;
  paintSw()}
 // ★buildTop() 을 여기서 바로 부르면 안 된다 — $ 가 아래에서 const 로 선언돼 있어 TDZ 오류가 나고, 그러면 스크립트 평가가 통째로 멈춰 화면이 죽는다 (2026-09-08 실측).
 // loadSlots() 의 await 뒤에서 부른다.
@@ -423,10 +426,7 @@ function updateTop(){
   setBundle('b_pose',pcur?pcur.prompt:null,!$('#pose_on').checked?OFF:(cur?waitTxt('pose'):WAIT))}
  setBundle('b_nsfw',ncur?ncur.nsfw_tags.map(t=>t.replace(/_/g,' ')).join(', '):null,!$('#nsfw_on').checked?OFF:(cur?waitTxt('nsfw'):T('체위를 굴리면 여기에 뜹니다')));
  setBundle('b_scene',scur?scur.prompt:null,!$('#scene_on').checked?OFF:(cur?waitTxt('scene'):WAIT));
- paintSw();renderMods();
- const n=$('#b_note');if(n)n.textContent=(PN>1?T('전체 = {n}girls + 인물마다 (신체+복장+표정+포즈)',{n:PN})
-  :(ncur&&ncur.stripped.length?T('전체 = 신체·복장에서 {tags} 를 걷어낸 것 + NSFW',{tags:ncur.stripped.join(', ')})
-   :(ncur?T('전체 = 신체·복장 + NSFW'):T('전체 = 신체·복장')))+(xcur?T(' + 표정'):'')+(pcur?T(' + 포즈'):''))+(scur?T(' + 씬'):'')}
+ paintSw();renderMods();loadQuick()}
 // 전체 복사: 인물 태그를 인물끼리 붙여 둔다 (디자인·표정·포즈가 인접해야 색이 덜 섞인다 — 사용자 지시 2026-09-08)
 function allText(){
  if(PN>1)return [PN+'girls',...Array.from({length:PN},(_,i)=>personText(i)),scur?scur.prompt:''].filter(Boolean).join(', ');
