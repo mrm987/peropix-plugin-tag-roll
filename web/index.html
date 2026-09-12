@@ -148,16 +148,16 @@ header #seedbox input{width:84px}
   <div class="grp">
    <div class="gh"><b data-t="표본">표본</b></div>
    <div class="row">
-    <label data-t-title="같은 캐릭터 태그의 그림을 표본에 이 장수까지만 넣습니다. 작은 표본에서 인기 캐릭터 한 명이 디자인을 지배하는 것을 막습니다 (오리지널 그림은 상한 없음). 「없음」이면 순수 빈도"><select id="charcap" onchange="roll(false)"><option value="0" data-t="캐릭터당 상한 없음">캐릭터당 상한 없음</option><option value="30" data-t="캐릭터당 30장">캐릭터당 30장</option><option value="100" selected data-t="캐릭터당 100장">캐릭터당 100장</option><option value="300" data-t="캐릭터당 300장">캐릭터당 300장</option></select></label>
-    <label><select id="rating" onchange="roll(false)"><option value="all" data-t="전 등급">전 등급</option><option value="gs" data-t="전연령만">전연령만</option></select></label>
-    <label data-t-title="켜면 동물귀·꼬리 계열 태그를 후보에서 뺍니다. 끄면 다른 태그와 똑같이 확률대로 나옵니다"><input type="checkbox" id="nokemono" onchange="roll(false)"> <span data-t="수인 제외">수인 제외</span></label>
-    <label data-t-title="켜면 흔한 조합 대신 이 앵커에서 유독 같이 쓰이는 태그 쪽으로 뽑습니다 (conf × lift^0.8)"><input type="checkbox" id="focus" onchange="roll(false)"> <span data-t="앵커 특화">앵커 특화</span></label>
+    <label data-t-title="같은 캐릭터 태그의 그림을 표본에 이 장수까지만 넣습니다. 작은 표본에서 인기 캐릭터 한 명이 디자인을 지배하는 것을 막습니다 (오리지널 그림은 상한 없음). 「없음」이면 순수 빈도"><select id="charcap" onchange="repaint()"><option value="0" data-t="캐릭터당 상한 없음">캐릭터당 상한 없음</option><option value="30" data-t="캐릭터당 30장">캐릭터당 30장</option><option value="100" selected data-t="캐릭터당 100장">캐릭터당 100장</option><option value="300" data-t="캐릭터당 300장">캐릭터당 300장</option></select></label>
+    <label><select id="rating" onchange="repaint()"><option value="all" data-t="전 등급">전 등급</option><option value="gs" data-t="전연령만">전연령만</option></select></label>
+    <label data-t-title="켜면 동물귀·꼬리 계열 태그를 후보에서 뺍니다. 끄면 다른 태그와 똑같이 확률대로 나옵니다"><input type="checkbox" id="nokemono" onchange="repaint()"> <span data-t="수인 제외">수인 제외</span></label>
+    <label data-t-title="켜면 흔한 조합 대신 이 앵커에서 유독 같이 쓰이는 태그 쪽으로 뽑습니다 (conf × lift^0.8)"><input type="checkbox" id="focus" onchange="repaint()"> <span data-t="앵커 특화">앵커 특화</span></label>
    </div>
   </div>
   <div class="grp">
    <div class="gh"><b data-t="인물">인물</b></div>
    <div class="row">
-    <label data-t-title="1 이면 여러 명이 있어야 성립하는 태그(eye contact·looking at another·straddling·pov)를 후보에서 뺍니다. 2 이상이면 그 태그를 되돌리고 신체·복장·표정·포즈를 인물 수만큼 따로 굴립니다 (씬은 한 벌)"><select id="people" onchange="roll(false)"><option value="1" data-t="1명">1명</option><option value="2" data-t="2명">2명</option><option value="3" data-t="3명">3명</option></select></label>
+    <label data-t-title="1 이면 여러 명이 있어야 성립하는 태그(eye contact·looking at another·straddling·pov)를 후보에서 뺍니다. 2 이상이면 그 태그를 되돌리고 신체·복장·표정·포즈를 인물 수만큼 따로 굴립니다 (씬은 한 벌)"><select id="people" onchange="repaint()"><option value="1" data-t="1명">1명</option><option value="2" data-t="2명">2명</option><option value="3" data-t="3명">3명</option></select></label>
     <label><span data-t="시드">시드</span> <input id="seed" type="text" style="width:96px"></label>
    </div>
   </div>
@@ -200,15 +200,15 @@ header #seedbox input{width:84px}
 <!-- 화면에서 안 보이지만 코드가 값을 읽는 것들 — 착의와 모듈 켜기는 제자리(복장 머리 · 결과 줄)에서 만진다 -->
 <div hidden id="stash">
  <select id="mode" onchange="applyMode()"><option value="dressed" data-t="전부 입기">전부 입기</option><option value="nude" data-t="누드">누드</option><option value="bare" data-t="완전 누드">완전 누드</option></select>
- <input type="checkbox" id="nsfw_on" checked onchange="nroll(false)">
- <input type="checkbox" id="expr_on" checked onchange="xroll(false)">
- <input type="checkbox" id="pose_on" checked onchange="proll(false)">
- <input type="checkbox" id="scene_on" checked onchange="sroll(false)">
- <select id="level" onchange="nroll(false)"><option value="1" data-t="약">약</option><option value="2" selected data-t="중">중</option><option value="3" data-t="강">강</option></select>
- <input type="checkbox" id="lockact" onchange="nroll(false)">
- <select id="bg" onchange="sroll(false)"><option value="auto" data-t="통계대로">통계대로</option><option value="simple" data-t="단순">단순</option><option value="real" data-t="실경">실경</option></select>
- <input type="checkbox" id="nowhite" onchange="sroll(false)">
- <select id="frame_sel" onchange="sroll(false)"><option value="auto" data-t="구도 자동">구도 자동</option><!--FRAMES--></select>
+ <input type="checkbox" id="nsfw_on" checked onchange="repaint()">
+ <input type="checkbox" id="expr_on" checked onchange="repaint()">
+ <input type="checkbox" id="pose_on" checked onchange="repaint()">
+ <input type="checkbox" id="scene_on" checked onchange="repaint()">
+ <select id="level" onchange="repaint()"><option value="1" data-t="약">약</option><option value="2" selected data-t="중">중</option><option value="3" data-t="강">강</option></select>
+ <input type="checkbox" id="lockact" onchange="repaint()">
+ <select id="bg" onchange="repaint()"><option value="auto" data-t="통계대로">통계대로</option><option value="simple" data-t="단순">단순</option><option value="real" data-t="실경">실경</option></select>
+ <input type="checkbox" id="nowhite" onchange="repaint()">
+ <select id="frame_sel" onchange="repaint()"><option value="auto" data-t="구도 자동">구도 자동</option><!--FRAMES--></select>
 </div>
 
 <script>
@@ -239,8 +239,11 @@ function personText(i){const p=P[i]||{};
  return [d,p.xcur?p.xcur.prompt:'',p.pcur?p.pcur.prompt:''].filter(Boolean).join(', ')}
 // 모듈별 온도: 드롭다운의 값이 비어 있으면(「전체 따름」) 전역 슬라이더를 쓴다 (사용자 결정 2026-09-07)
 function tempFor(mod){const el=document.querySelector('#t_'+mod);return (el&&el.value)?el.value:$('#temp').value}
-const TEMP_RE={design:()=>roll(false),nsfw:()=>nroll(false),expr:()=>xroll(false),pose:()=>proll(false),scene:()=>sroll(false)};
-function tempChanged(mod){if(cur)TEMP_RE[mod]()}
+/** ★★조건을 바꿔도 굴리지 않는다 — 굴리는 것은 「굴리기」·「다시」를 눌렀을 때뿐이다 (사용자 지시 2026-09-12).
+ *  이미 뽑힌 결과는 근거가 된 태그가 꺼져도 **그대로 둔다.** 새 조건은 다음 굴리기에서 판정한다.
+ *  전에는 스위치 하나를 건드릴 때마다 결과가 통째로 바뀌어, 조건을 맞춰 보는 동안 결과를 붙들 수 없었다. */
+function repaint(){renderPanel();renderMods();paintSw()}
+function tempChanged(){repaint()}
 // ---- 굴리기 대상 패널 (사용자 지시 2026-09-08 「모듈단위로 모아보고 체크할 수 있는 형태로」) ----
 // 슬롯마다 3단이다: 꺼짐 ☐ → 통계대로 ☑(「없음」 포함) → 반드시 ★(「없음」 제거). 눌러서 돌린다.
 // 착의 모드가 끄는 슬롯은 상태를 그대로 두고 회색·취소선으로만 보인다 (사용자 지시: 「특정 그룹 온오프처럼」).
@@ -276,9 +279,9 @@ function renderPanel(){if(!SL)return;
  const seat=$('#wearmode');if(seat&&mode)seat.appendChild(mode);}
 // 장르·복식은 2단이다 (꺼짐 ☐ / 켜짐 ☑) — 슬롯과 달리 「반드시」가 없다. 개수 제한 없이 OR 로 풀을 넓힌다.
 function tri2(m,k,label){return `<span class="tri ${stOf(m,k)?'s1':''}" onclick="cycle2('${m}','${k}')" title="${T('눌러서 켜고 끕니다')}">${T(label)}</span>`}
-function cycle2(m,k){ST[skey(m,k)]=stOf(m,k)?0:1;renderPanel();renderMods();roll(false)}
-function cycle(m,k){if(isMuted(m,k))return;ST[skey(m,k)]=(stOf(m,k)+1)%3;renderPanel();renderMods();roll(false)}
-function applyMode(){renderPanel();renderMods();roll(false)}
+function cycle2(m,k){ST[skey(m,k)]=stOf(m,k)?0:1;repaint()}
+function cycle(m,k){if(isMuted(m,k))return;ST[skey(m,k)]=(stOf(m,k)+1)%3;repaint()}
+function applyMode(){repaint()}
 function onSet(m){if(!SL)return null;const off=groupOff();
  return modSlots(m).map(s=>s.key).filter(k=>stOf(m,k)>=1&&!(m==='design'&&off.has(k)))}
 function reqSet(m){if(!SL)return '';const off=groupOff();
@@ -323,9 +326,7 @@ function toggleGroup(g){
  if(!SL)return;const keys=groupKeys(g);
  if(groupOn(g)){SAVED[g]={};keys.forEach(k=>{SAVED[g][k]=stOf('design',k);ST[skey('design',k)]=0})}
  else keys.forEach(k=>{ST[skey('design',k)]=(SAVED[g]&&SAVED[g][k])||1});
- renderPanel();renderMods();paintSw();
- // ★굴리기가 끝난 뒤 한 번 더 — 그 사이 결과 줄이 다시 그려지므로 마지막 상태로 맞춘다
- roll(false).then(paintSw)}
+ repaint()}
 function paintSw(){
  ['nsfw','expr','pose','scene'].forEach(m=>{const el=$('#sw_'+m),c=$('#'+m+'_on');
   if(el&&c)el.classList.toggle('on',c.checked)});
@@ -398,8 +399,8 @@ function attachSuggest(inp,sug,onPick){
   const r=await fetch('../api/tags?q='+encodeURIComponent(q)+'&lang='+tagrollLang());const a=await r.json();
   sug.innerHTML='';a.forEach(t=>{const d=document.createElement('div');d.textContent=t;d.onclick=()=>{const parts=inp.value.split(',');parts[parts.length-1]=t;inp.value=parts.map(x=>x.trim()).filter(Boolean).join(', ');sug.hidden=true;onPick()};sug.appendChild(d)});sug.hidden=!a.length});
  inp.addEventListener('keydown',e=>{if(e.key==='Enter'){sug.hidden=true;onPick()}})}
-attachSuggest($('#tag'),$('#sug'),()=>{fixed={};roll(true)});
-attachSuggest($('#excl'),$('#sug2'),()=>roll(false));   // 제외 태그를 바꾸면 같은 시드로 다시 굴린다
+attachSuggest($('#tag'),$('#sug'),()=>{fixed={}});     // 태그만 넣는다 — 굴리는 것은 「굴리기」다
+attachSuggest($('#excl'),$('#sug2'),()=>{});
 // 복식은 인물 쪽 모듈(디자인·표정·포즈)에만 싣는다 — 씬은 장르만 본다 (사용자 지시 2026-09-08 「장르가 복식보다 더 배경에 영향을 줘야함」)
 function segText(){return SL?SL.genres.filter(g=>stOf('genre',g.key)).map(g=>g.key).join(','):''}
 function cosText(){return SL?SL.costumes.filter(c=>stOf('cos',c.key)).map(c=>c.key).join(','):''}
