@@ -12,6 +12,18 @@
   "use strict";
 
   var EN = {
+    // 화면 골격 (2026-09-12: 두 칸으로 다시 세우며 생긴 것들)
+    "굴리기 조건": "Roll settings",
+    "신체": "Body", "복장": "Outfit", "신체·복장": "Body & outfit",
+    "표본": "Sample", "인물": "People",
+    "필수 포함 태그": "Must include", "제외 태그": "Exclude",
+    "이번에 굴린 프롬프트": "This roll", "모듈별": "Per module", "다시": "Again",
+    // 복장 슬롯 — 신체 부위 이름과 겹치지 않게 고쳤다
+    "목장식": "Neckwear", "장갑": "Gloves", "팔 장식": "Wristwear", "다리옷": "Legwear", "허리띠": "Belt",
+    "전체 = 신체·복장": "All = body & outfit",
+    "전체 = 신체·복장 + NSFW": "All = body & outfit + NSFW",
+    "전체 = 신체·복장에서 {tags} 를 걷어낸 것 + NSFW": "All = body & outfit minus {tags} + NSFW",
+    "전체 = {n}girls + 인물마다 (신체+복장+표정+포즈)": "All = {n}girls + per person (body + outfit + expression + pose)",
     // ── 도구줄 ──
     "태그 굴리기": "Tag Roll",
     "태그 (쉼표로 여러 개: white_thighhighs, serafuku)": "Tags (comma-separated: white_thighhighs, serafuku)",
@@ -210,6 +222,17 @@
   };
 
   var JA = {
+    // 画面の骨格
+    "굴리기 조건": "ロール設定",
+    "신체": "身体", "복장": "服装", "신체·복장": "身体・服装",
+    "표본": "標本", "인물": "人数",
+    "필수 포함 태그": "必ず入れるタグ", "제외 태그": "除外タグ",
+    "이번에 굴린 프롬프트": "今回のプロンプト", "모듈별": "モジュール別", "다시": "もう一度",
+    "목장식": "首まわり", "장갑": "手袋", "팔 장식": "腕まわり", "다리옷": "脚もの", "허리띠": "ベルト",
+    "전체 = 신체·복장": "全体 = 身体・服装",
+    "전체 = 신체·복장 + NSFW": "全体 = 身体・服装 + NSFW",
+    "전체 = 신체·복장에서 {tags} 를 걷어낸 것 + NSFW": "全体 = 身体・服装から {tags} を外したもの + NSFW",
+    "전체 = {n}girls + 인물마다 (신체+복장+표정+포즈)": "全体 = {n}girls + 人物ごとに（身体＋服装＋表情＋ポーズ）",
     "태그 굴리기": "タグロール",
     "태그 (쉼표로 여러 개: white_thighhighs, serafuku)": "タグ（カンマ区切り：white_thighhighs, serafuku）",
     "제외 태그 (여기 적은 태그는 어느 모듈에서도 안 뽑힘)": "除外タグ（どのモジュールでも出しません）",

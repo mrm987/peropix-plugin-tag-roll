@@ -105,14 +105,20 @@ HAIR_LEN = {"very_long_hair", "long_hair", "medium_hair", "short_hair", "very_sh
 #  전체 57% 가 태그 없음) 늘 크기 하나를 뽑아 뒤 슬롯의 조건으로 쓰니 옷 슬롯이 노출 옷으로 쏠렸다 (brown_hair 앵커 원피스 슬롯 swimsuit 0.096 → large_breasts 조건 뒤 0.206, 2026-09-07 실측).
 SLOTS = [("hair_color", "머리색", False), ("hair_len", "머리 길이", False), ("hair_style", "머리 형태", False), ("eye_color", "눈색", False),
          ("face", "얼굴", False), ("ears", "귀", False), ("body", "가슴", False),
-         ("onepiece", "원피스", False), ("upper", "상의", False), ("outer", "겉옷", False), ("lower", "하의", False), ("waist", "허리", False),
-         ("legs", "다리", False), ("feet", "신발", False), ("hands", "손", False), ("wrist", "손목", False),
-         ("head", "머리 장식", False), ("neck", "목", False), ("armor", "갑주", False), ("weapon", "무기", False), ("race", "종족 파츠", False)]
+         ("onepiece", "원피스", False), ("upper", "상의", False), ("outer", "겉옷", False), ("lower", "하의", False), ("waist", "허리띠", False),
+         ("legs", "다리옷", False), ("feet", "신발", False), ("hands", "장갑", False), ("wrist", "팔 장식", False),
+         ("head", "머리 장식", False), ("neck", "목장식", False), ("armor", "갑주", False), ("weapon", "무기", False), ("race", "종족 파츠", False)]
 WEARABLE = {"onepiece", "upper", "outer", "lower", "waist", "legs", "feet", "hands", "wrist", "head", "neck", "armor", "weapon"}   # 착의 모드가 켜고 끄는 부위
 DEFAULT_OFF = {"armor", "weapon"}   # 처음에는 꺼 둔다 (판타지용)
-# 신체도 구역 (UI). (구역 이름, 슬롯들)
-ZONES = [("머리", ["hair_color", "hair_len", "hair_style", "head"]), ("얼굴", ["eye_color", "face", "ears"]), ("목", ["neck"]),
-         ("몸통", ["body", "onepiece", "upper", "outer", "waist", "armor"]), ("팔", ["hands", "wrist", "weapon"]), ("다리", ["lower", "legs"]), ("발", ["feet"]), ("종족", ["race"])]
+# 화면의 부위 목록 (구역 이름, 슬롯들).
+# ★★**신체와 복장을 가른다** (사용자 지시 2026-09-12). 가르는 선은 `WEARABLE` 이 이미 갖고 있던 것이고,
+#   착의 모드(누드·완전 누드)가 끄는 것도 전부 복장 쪽이라 무엇이 꺼졌는지 한눈에 보인다.
+#   ★복장 쪽 이름 다섯은 신체 부위 이름을 쓰고 있어 헷갈렸다 — 목→목장식 · 손→장갑 · 손목→팔 장식 ·
+#     다리→다리옷 · 허리→허리띠 로 고쳤다 (같은 날 지시).
+BODY_ZONES = [("머리", ["hair_color", "hair_len", "hair_style"]), ("얼굴", ["eye_color", "face", "ears"]),
+              ("몸", ["body", "race"])]
+WEAR_ZONES = [("머리", ["head"]), ("상체", ["neck", "onepiece", "upper", "outer", "waist", "armor"]),
+              ("팔", ["wrist", "hands", "weapon"]), ("하체", ["lower", "legs", "feet"])]
 # ---- NSFW 모듈 ----
 ACTS = "cowgirl_position reverse_cowgirl_position squatting_cowgirl_position doggystyle sex_from_behind prone_bone missionary mating_press standing_sex suspended_congress reverse_suspended_congress full_nelson spooning amazon_position leg_lock piledriver_(sex) fellatio irrumatio paizuri handjob footjob cunnilingus breast_sucking masturbation fingering".split()
 NSLOTS = [  # (key, 라벨, 후보 풀). 후보는 사전에 있는 것만 쓴다. 전부 「없음」 가능
