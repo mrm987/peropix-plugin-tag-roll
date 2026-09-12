@@ -253,8 +253,11 @@ function repaint(){renderPanel();renderMods();paintSw();saveOpts()}
  *  (아래 `OPT_KEY` 는 이 화면만 쓰는 굴리기 조건이라 그대로 브라우저에 남긴다.) */
 async function loadQuick(){try{const r=await fetch('../api/opt');const d=await r.json();
  const el=$('#quickgen');if(el)el.checked=!!d.quickGen}catch(e){}}
-async function saveQuick(){try{await fetch('../api/opt',{method:'POST',headers:{'Content-Type':'application/json'},
- body:JSON.stringify({quickGen:!!$('#quickgen').checked})})}catch(e){}}
+async function saveQuick(){const on=!!$('#quickgen').checked;
+ try{await fetch('../api/opt',{method:'POST',headers:{'Content-Type':'application/json'},
+  body:JSON.stringify({quickGen:on})})}catch(e){}
+ // ★바뀐 것을 앱 쪽 확장에 알린다 — 그래야 단추가 **그 자리에서** 서고 사라진다 (사용자 지적 2026-09-13)
+ try{parent.postMessage({type:'tagroll',event:'opt',quickGen:on},'*')}catch(e){}}
 
 /** ★★**앱이 시키는 「한 번에」** — 생성 화면의 단추이 눌리면 확장 JS 가 이 창을 불러 세운다.
  *  굴리고 넣는 규칙은 이 화면에만 있다 (`rollAndPut`) — 확장 쪽에 베껴 두면 둘이 어긋난다.

@@ -58,28 +58,43 @@
   window.peropix.registerExtension({
     name: "tag-roll.quick",
     async setup(api) {
-      // ★못 읽거나 꺼져 있으면 단추를 세우지 않는다 — 켠 적 없는 사용자에게 화면이 달라지면 안 된다
-      let on = false;
+      /** 단추를 세우고 뗀다. `addButton` 이 **되돌리는 함수**를 주면 그 자리에서 뗄 수 있고,
+       *  옛 앱처럼 안 주면 세우기만 한다 (그때는 앱을 다시 켜야 사라진다). */
+      let off = null;
+      const sync = (on) => {
+        if (on && !off) {
+          const r = api.addButton("generate.footer", {
+            label: { ko: SAY.ko.label, en: SAY.en.label, ja: SAY.ja.label },
+            onClick: async () => {
+              const s = say(api);
+              const f = await frame(api);
+              if (!f) return api.toast(s.fail, "warn");
+              api.toast(s.busy);
+              const ok = await ask(f);
+              if (!ok) return api.toast(s.fail, "warn");
+              await api.action("generate", {});
+            },
+          });
+          off = typeof r === "function" ? r : null;
+        } else if (!on && off) {
+          off();
+          off = null;
+        }
+      };
+
+      // ★★화면에서 켜고 끄면 **그 자리에서** 따라간다 (사용자 지적 2026-09-13: 켠 뒤 새로고침해야 보였다)
+      window.addEventListener("message", (e) => {
+        const m = e.data;
+        if (m && m.type === "tagroll" && m.event === "opt") sync(!!m.quickGen);
+      });
+
+      // ★못 읽으면 세우지 않는다 — 켠 적 없는 사용자에게 화면이 달라지면 안 된다
       try {
         const r = await fetch(`${api.backend}/plug/${ID}/api/opt`);
-        on = !!(await r.json()).quickGen;
+        sync(!!(await r.json()).quickGen);
       } catch (e) {
-        return;
+        /* 백엔드가 아직 안 떴을 수 있다 — 화면에서 켜면 위 알림으로 선다 */
       }
-      if (!on) return;
-
-      api.addButton("generate.footer", {
-        label: { ko: SAY.ko.label, en: SAY.en.label, ja: SAY.ja.label },
-        onClick: async () => {
-          const s = say(api);
-          const f = await frame(api);
-          if (!f) return api.toast(s.fail, "warn");
-          api.toast(s.busy);
-          const ok = await ask(f);
-          if (!ok) return api.toast(s.fail, "warn");
-          await api.action("generate", {});
-        },
-      });
     },
   });
 })();
