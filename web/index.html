@@ -177,7 +177,7 @@ header #seedbox input{width:84px}
     </div>
    </div>
    <div class="go">
-    <label><span data-t="온도">온도</span> <input id="temp" type="range" min="0.3" max="2.5" step="0.1" value="1.0" oninput="tv.textContent=this.value"> <span id="tv">1.0</span></label>
+    <label><span data-t="온도">온도</span> <input id="temp" type="range" min="0.3" max="2.5" step="0.1" value="1.0" oninput="tv.textContent=this.value" onchange="repaint()"> <span id="tv">1.0</span></label>
     <details id="tdet" data-t-title="모듈마다 온도를 따로 정합니다. 「전체 따름」이면 위 슬라이더 값을 씁니다"><summary data-t="모듈별">모듈별</summary>
      <div class="tgrid"><!--MODTEMPS--></div></details>
     <span class="spacer"></span>
@@ -242,7 +242,22 @@ function tempFor(mod){const el=document.querySelector('#t_'+mod);return (el&&el.
 /** ★★조건을 바꿔도 굴리지 않는다 — 굴리는 것은 「굴리기」·「다시」를 눌렀을 때뿐이다 (사용자 지시 2026-09-12).
  *  이미 뽑힌 결과는 근거가 된 태그가 꺼져도 **그대로 둔다.** 새 조건은 다음 굴리기에서 판정한다.
  *  전에는 스위치 하나를 건드릴 때마다 결과가 통째로 바뀌어, 조건을 맞춰 보는 동안 결과를 붙들 수 없었다. */
-function repaint(){renderPanel();renderMods();paintSw()}
+function repaint(){renderPanel();renderMods();paintSw();saveOpts()}
+/** ★★**조건을 기억한다** (사용자 지시 2026-09-12: *"앱 재실행해도 보존"*).
+ *  이 화면은 앱과 **다른 오리진**(백엔드 포트)이라 저장소가 앱 것과 섞이지 않고, 앱을 껐다 켜도 남는다
+ *  (실측 2026-09-12). 기억하는 것은 **조건**뿐이다 — 필수 포함·제외 태그처럼 그때그때 적는 것은 안 담는다.
+ *  ★백엔드 포트가 밀리면(8770 이 막혀 다른 번호로 뜨면) 오리진이 달라져 처음 상태로 돌아간다. 조건일 뿐이라 그대로 둔다. */
+const OPT_KEY='tagroll_opts_v1';
+const OPT_IDS=['charcap','rating','nokemono','focus','people','mode','nsfw_on','expr_on','pose_on','scene_on',
+ 'level','lockact','bg','nowhite','frame_sel','temp','t_design','t_nsfw','t_expr','t_pose','t_scene'];
+function saveOpts(){try{const v={};
+ OPT_IDS.forEach(id=>{const el=$('#'+id);if(el)v[id]=el.type==='checkbox'?el.checked:el.value});
+ localStorage.setItem(OPT_KEY,JSON.stringify({st:ST,v}))}catch(e){}}
+function loadOpts(){try{const o=JSON.parse(localStorage.getItem(OPT_KEY)||'null');if(!o)return;
+ if(o.st)Object.assign(ST,o.st);            // 지금 판에 없는 슬롯이 섞여 있어도 아무도 안 읽는다
+ Object.entries(o.v||{}).forEach(([id,val])=>{const el=$('#'+id);if(!el)return;
+  if(el.type==='checkbox')el.checked=!!val;else el.value=val});
+ const t=$('#temp'),tv=$('#tv');if(t&&tv)tv.textContent=t.value}catch(e){}}
 function tempChanged(){repaint()}
 // ---- 굴리기 대상 패널 (사용자 지시 2026-09-08 「모듈단위로 모아보고 체크할 수 있는 형태로」) ----
 // 슬롯마다 3단이다: 꺼짐 ☐ → 통계대로 ☑(「없음」 포함) → 반드시 ★(「없음」 제거). 눌러서 돌린다.
@@ -299,6 +314,7 @@ async function loadSlots(){const r=await fetch('../api/slots?lang='+tagrollLang(
  fillTemps();fillFrames(SL.frames||[]);
  SL.slots.forEach(s=>ST[skey('design',s.key)]=SL.default_off.includes(s.key)?0:1);
  (SL.modules||[]).forEach(mo=>mo.slots.forEach(s=>ST[skey(mo.key,s.key)]=1));
+ loadOpts();                                 // 기본값을 깐 뒤 기억해 둔 조건을 덮는다
  renderPanel();buildTop();renderMods()}
 // ★text 가 null 이면 「아직 안 굴림」, 빈 문자열이면 「굴렸는데 전부 없음」이다 (2026-09-08 실측: 둘을 같이 다뤄
 //  씬이 전부 「없음」으로 나오면 묶음 줄이 「굴리는 중…」에 머물러 멈춘 것처럼 보였다. NSFW 를 켜면 씬 표본이
