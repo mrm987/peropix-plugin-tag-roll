@@ -21,8 +21,12 @@
     `/plug/tag-roll/` 에 붙는다. `./api/…` 로 적으면 정적 폴더 아래를 가리켜 404 가 온다 (실측 2026-09-10:
     게스트 화면이 「색인 0MB」 로 떴다 — 404 의 JSON 을 상태로 읽었다).
 -->
-<link rel="stylesheet" href="/plug/_app/base.css">
-<script src="/plug/_app/peropix.js"></script>
+<!-- ★★**상대 경로여야 한다** (2026-09-12 실측). 배포본은 모든 주소에 **이번 실행의 열쇠**가
+     앞머리로 붙는데(`/<키>/plug/<id>/web/`), `/plug/_app/…` 로 적으면 그 앞머리를 건너뛰어
+     403 을 받는다 — 스타일이 하나도 안 실려 **흰 바탕에 글자만** 나온다.
+     개발 환경은 열쇠가 없어 절대 경로도 통해서, 배포본에서만 드러났다. -->
+<link rel="stylesheet" href="../../_app/base.css">
+<script src="../../_app/peropix.js"></script>
 <script src="i18n.js"></script>
 <style>
 /* 도구줄 */
