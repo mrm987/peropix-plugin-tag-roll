@@ -22,5 +22,8 @@
   },
   "contributes": {
     "canvas": true
-  }
+  },
+  "ext": [
+    "ext/main.js"
+  ]
 }

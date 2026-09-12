@@ -34,6 +34,47 @@ def _json(d) -> Response:
     return Response(json.dumps(d, ensure_ascii=False), media_type="application/json; charset=utf-8")
 
 
+# ── 옵션 ────────────────────────────────────────────────────────────
+# ★★화면(iframe)과 확장 JS(앱 페이지)는 **다른 문서**라 저장소를 나눠 쓰지 못한다. 그래서 화면이 켠 것을
+#   확장이 알려면 이 창구를 거쳐야 한다. 담는 것은 「생성 화면에 단추를 둘까」 같은 **선택**뿐이다.
+OPT_FILE = "opt.json"
+OPT_KEYS = {"quickGen"}          # 받아 주는 것만 적는다 — 모르는 키는 버린다
+
+
+def _opt_path():
+    return idx.dirpath() / OPT_FILE
+
+
+def _opt_read() -> dict:
+    try:
+        d = json.loads(_opt_path().read_text(encoding="utf-8"))
+        return {k: bool(v) for k, v in d.items() if k in OPT_KEYS}
+    except Exception:
+        return {}
+
+
+@router.get("/api/opt")
+async def api_opt_get():
+    return _json({"ok": True, **{k: False for k in OPT_KEYS}, **_opt_read()})
+
+
+@router.post("/api/opt")
+async def api_opt_set(request: Request):
+    body = {}
+    try:
+        body = await request.json()
+    except Exception:
+        pass
+    cur = {**_opt_read(), **{k: bool(v) for k, v in (body or {}).items() if k in OPT_KEYS}}
+    try:
+        p = _opt_path()
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(json.dumps(cur, ensure_ascii=False), encoding="utf-8")
+    except OSError as e:
+        return _json({"ok": False, "error": str(e)})
+    return _json({"ok": True, **cur})
+
+
 # ── 색인 ────────────────────────────────────────────────────────────
 # ★언어는 화면이 `lang=` 으로 알려 준다 (앱 설정을 따라간다). 창구가 돌려주는 문구가 그 언어로 나간다.
 def _lang(request: Request) -> None:

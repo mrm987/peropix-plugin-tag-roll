@@ -187,6 +187,7 @@ header #seedbox input{width:84px}
     <span class="spacer"></span>
     <button class="primary" id="btnRoll" onclick="roll(true)" data-t="굴리기">굴리기</button>
     <button id="btnRollPut" onclick="rollAndPut(this)" data-t-title="굴린 뒤 결과를 바로 지금 씬에 넣습니다 (내가 넣었던 블록은 먼저 지웁니다)" data-t="굴리기+넣기">굴리기+넣기</button>
+    <label data-t-title="켜면 생성 화면에 「랜덤 생성」 단추가 생깁니다. 누르면 지금 조건으로 굴려 넣고 바로 생성합니다 (앱을 다시 켜면 반영됩니다)"><input type="checkbox" id="quickgen" onchange="saveQuick()"> <span data-t="생성 화면에 단추">생성 화면에 단추</span></label>
    </div>
    <div class="res">
     <h3 data-t="이번에 굴린 프롬프트">이번에 굴린 프롬프트</h3>
@@ -247,6 +248,25 @@ function tempFor(mod){const el=document.querySelector('#t_'+mod);return (el&&el.
  *  이미 뽑힌 결과는 근거가 된 태그가 꺼져도 **그대로 둔다.** 새 조건은 다음 굴리기에서 판정한다.
  *  전에는 스위치 하나를 건드릴 때마다 결과가 통째로 바뀌어, 조건을 맞춰 보는 동안 결과를 붙들 수 없었다. */
 function repaint(){renderPanel();renderMods();paintSw();saveOpts()}
+/** ★★**생성 화면의 단추는 백엔드에 적어 둔다.** 이 화면과 확장 JS(앱 페이지)는 다른 문서라
+ *  저장소를 나눠 쓰지 못한다 — 확장이 「단추를 둘까」를 알 길이 이 창구뿐이다.
+ *  (아래 `OPT_KEY` 는 이 화면만 쓰는 굴리기 조건이라 그대로 브라우저에 남긴다.) */
+async function loadQuick(){try{const r=await fetch('../api/opt');const d=await r.json();
+ const el=$('#quickgen');if(el)el.checked=!!d.quickGen}catch(e){}}
+async function saveQuick(){try{await fetch('../api/opt',{method:'POST',headers:{'Content-Type':'application/json'},
+ body:JSON.stringify({quickGen:!!$('#quickgen').checked})})}catch(e){}}
+
+/** ★★**앱이 시키는 「한 번에」** — 생성 화면의 단추이 눌리면 확장 JS 가 이 창을 불러 세운다.
+ *  굴리고 넣는 규칙은 이 화면에만 있다 (`rollAndPut`) — 확장 쪽에 베껴 두면 둘이 어긋난다.
+ *  생성은 앱이 한다: 여기서는 넣기까지만 하고 끝났다고 알린다. */
+window.addEventListener('message', async (e) => {
+ const m = e.data;
+ if (!m || m.type !== 'tagroll' || m.call !== 'rollAndPut') return;
+ let ok = true;
+ try { await rollAndPut($('#btnRollPut')); } catch (err) { ok = false; }
+ try { e.source.postMessage({ type: 'tagroll', id: m.id, ok }, '*'); } catch (err) {}
+});
+
 /** ★★**조건을 기억한다** (사용자 지시 2026-09-12: *"앱 재실행해도 보존"*).
  *  이 화면은 앱과 **다른 오리진**(백엔드 포트)이라 저장소가 앱 것과 섞이지 않고, 앱을 껐다 켜도 남는다
  *  (실측 2026-09-12). 기억하는 것은 **조건**뿐이다 — 필수 포함·제외 태그처럼 그때그때 적는 것은 안 담는다.
@@ -319,6 +339,7 @@ async function loadSlots(){const r=await fetch('../api/slots?lang='+tagrollLang(
  SL.slots.forEach(s=>ST[skey('design',s.key)]=SL.default_off.includes(s.key)?0:1);
  (SL.modules||[]).forEach(mo=>mo.slots.forEach(s=>ST[skey(mo.key,s.key)]=1));
  loadOpts();                                 // 기본값을 깐 뒤 기억해 둔 조건을 덮는다
+ loadQuick();                                // 생성 화면 단추 여부는 백엔드에 있다
  renderPanel();buildTop();renderMods()}
 // ★text 가 null 이면 「아직 안 굴림」, 빈 문자열이면 「굴렸는데 전부 없음」이다 (2026-09-08 실측: 둘을 같이 다뤄
 //  씬이 전부 「없음」으로 나오면 묶음 줄이 「굴리는 중…」에 머물러 멈춘 것처럼 보였다. NSFW 를 켜면 씬 표본이
