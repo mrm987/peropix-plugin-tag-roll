@@ -5,11 +5,11 @@
     "en": "Tag Roll",
     "ja": "タグロール"
   },
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": {
-    "ko": "태그 하나에서 출발해 부위별로 디자인·표정·포즈·씬을 danbooru 통계에서 뽑는다. 처음 열 때 색인(약 960MB)을 내려받는다.",
-    "en": "Starts from one tag and draws design, expression, pose and scene slot by slot from danbooru statistics. Downloads an index (about 960MB) the first time you open it.",
-    "ja": "タグ一つから出発して、デザイン・表情・ポーズ・シーンを部位ごとに danbooru の統計から引きます。初回起動時にインデックス（約960MB）を取得します。"
+    "ko": "단부루 태그 기반으로 장르, 복식 별 랜덤 캐릭터 태그 생성.",
+    "en": "Random character tags by genre and outfit, based on danbooru tags.",
+    "ja": "danbooru タグをもとに、ジャンル・服装別のランダムなキャラクタータグを生成。"
   },
   "homepage": "https://github.com/mrm987/peropix-plugin-tag-roll",
   "server": "server.py",
